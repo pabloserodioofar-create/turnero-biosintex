@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Biosintex | Portal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; color: #004f89; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+<div class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+    <div class="flex items-center justify-center gap-2 mb-8">
+        <span class="text-[#004f89] font-extrabold text-2xl tracking-tighter">Biosintex</span>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded bg-{{ 'green' if category=='success' else 'red' }}-100 text-{{ 'green' if category=='success' else 'red' }}-700 text-sm">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if type == 'login' %}
+    <h2 class="text-xl font-bold mb-6 text-center">Ingreso</h2>
+    <form action="{{ url_for('login') }}" method="POST" class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Usuario</label>
+            <input type="text" name="username" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#004f89] focus:ring focus:ring-[#004f89] focus:ring-opacity-50" placeholder="ID Proveedor o email">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Contraseña</label>
+            <input type="password" name="password" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#004f89] focus:ring focus:ring-[#004f89] focus:ring-opacity-50">
+        </div>
+        <button type="submit" class="w-full py-2 px-4 bg-[#004f89] text-white rounded-md hover:bg-blue-800 transition font-bold">Ingresar</button>
+    </form>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

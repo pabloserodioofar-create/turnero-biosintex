@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Biosintex | Panel Supervisor</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff;}
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; color: #004f89; }
+        .fc-event { cursor: pointer; }
+    </style>
+</head>
+<body class="bg-[#f8f9ff] text-[#0b1c30] antialiased">
+
+<header class="fixed top-0 w-full z-50 bg-white flex justify-between items-center px-6 h-16 shadow-sm border-b">
+    <div class="flex items-center gap-2">
+        <span class="text-[#004f89] font-extrabold text-xl tracking-tighter">Biosintex Supervisor</span>
+    </div>
+    <div class="flex items-center gap-4">
+        <span class="text-sm font-bold text-gray-500">Supervisor</span>
+        <a href="{{ url_for('logout') }}" class="text-red-600 font-medium hover:underline text-sm border px-3 py-1 rounded">Cerrar Sesión</a>
+    </div>
+</header>
+
+<main class="pt-24 pb-12 px-4 md:px-12 min-h-screen">
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-8 flex justify-between items-end">
+            <div>
+                <h1 class="text-3xl font-extrabold text-[#0b1c30] tracking-tighter">Calendario de Turnos</h1>
+                <p class="text-gray-500 mt-1">Vista gerencial de ingresos de mercadería</p>
+            </div>
+            <div class="flex gap-3 items-center">
+                <select id="plantaFilter" class="p-2 border rounded-md shadow-sm focus:border-[#004f89] focus:ring focus:ring-[#004f89]">
+                    <option value="all">Todas las Plantas</option>
+                    <option value="Barracas">Planta Barracas</option>
+                    <option value="Pibera">Planta Pibera</option>
+                </select>
+                <button id="btn_upload_excel" class="bg-green-600 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-green-700 transition flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">upload</span>
+                    Actualizar Turnos
+                </button>
+                <button id="btn_open_proveedores" class="bg-blue-600 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-blue-700 transition flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">group</span>
+                    Proveedores
+                </button>
+                <button id="btn_open_block" class="bg-amber-500 text-white px-4 py-2 rounded-md font-bold text-sm hover:bg-amber-600 transition flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">block</span>
+                    Bloquear Días
+                </button>
+            </div>
+        </header>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div id='calendar'></div>
+        </div>
+        
+        <!-- Info Bar -->
+        <div id="infoBar" class="mt-4 flex justify-between items-center text-sm text-gray-600 bg-white p-3 rounded-lg border border-gray-200">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-gray-400 text-base">update</span>
+                <span>Última actualización de Turnos: <strong id="lastUpdate">Cargando...</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-gray-400 text-base">description</span>
+                <span>Total OC en sistema: <strong id="totalOC">-</strong></span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modal for Event Details -->
+<div id="eventModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center">
+    <div class="bg-white p-8 rounded-xl max-w-md w-full shadow-2xl">
+        <h3 class="text-xl font-bold mb-4 border-b pb-2" id="m_title">Detalle de Turno</h3>
+        <p class="mb-2 text-sm"><strong>OC:</strong> <span id="m_oc"></span></p>
+        <p class="mb-2 text-sm"><strong>Proveedor:</strong> <span id="m_prov"></span></p>
+        <p class="mb-2 text-sm"><strong>Email:</strong> <span id="m_email"></span></p>
+        <p class="mb-2 text-sm"><strong>Material:</strong> <span id="m_art"></span></p>
+        <p class="mb-2 text-sm"><strong>Pallets:</strong> <span id="m_pallets"></span></p>
+        <p class="mb-4 text-sm"><strong>Planta:</strong> <span id="m_planta"></span></p>
+        
+        <div class="mt-4 border-t pt-4">
+            <label class="block text-sm font-bold text-gray-700 mb-2">Cancelar Turno (Motivo):</label>
+            <input type="text" id="m_cancel_reason" placeholder="Ej. Depósito lleno, reprogramar" class="w-full p-2 border rounded-md shadow-sm mb-3">
+            <button id="btn_cancel_shift" class="w-full bg-red-600 text-white py-2 rounded font-bold hover:bg-red-800 transition">Cancelar Turno y Notificar</button>
+        </div>
+
+        <button onclick="document.getElementById('eventModal').classList.add('hidden')" class="w-full mt-3 bg-gray-200 text-gray-800 py-2 rounded font-bold hover:bg-gray-300">Cerrar</button>
+    </div>
+</div>
+
+<!-- Modal for Blocking Days -->
+<div id="blockModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center">
+    <div class="bg-white p-8 rounded-xl max-w-lg w-full shadow-2xl">
+        <h3 class="text-xl font-bold mb-4 border-b pb-2">
+            <span class="material-symbols-outlined text-amber-500 mr-2">event_busy</span>
+            Gestionar Días Bloqueados
+        </h3>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-bold text-gray-700 mb-2">Bloquear un nuevo día:</label>
+            <div class="flex gap-3">
+                <input type="date" id="block_date_input" class="flex-1 p-2 border rounded-md shadow-sm">
+                <input type="text" id="block_reason_input" placeholder="Motivo (ej. Inventario)" class="flex-1 p-2 border rounded-md shadow-sm">
+            </div>
+            <button id="btn_add_block" class="mt-3 w-full bg-amber-500 text-white py-2 rounded font-bold hover:bg-amber-600 transition">Bloquear Día</button>
+        </div>
+        
+        <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">Días bloqueados actuales:</label>
+            <div id="blocked_days_list" class="space-y-2 max-h-60 overflow-y-auto">
+                <p class="text-sm text-gray-400">Cargando...</p>
+            </div>
+        </div>
+        
+        <button onclick="document.getElementById('blockModal').classList.add('hidden')" class="w-full mt-5 bg-gray-200 text-gray-800 py-2 rounded font-bold hover:bg-gray-300">Cerrar</button>
+    </div>
+</div>
+
+<!-- Modal for Upload Excel -->
+<div id="uploadModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center">
+    <div class="bg-white p-8 rounded-xl max-w-lg w-full shadow-2xl">
+        <h3 class="text-xl font-bold mb-4 border-b pb-2">
+            <span class="material-symbols-outlined text-green-600 mr-2">upload</span>
+            Actualizar Base de Turnos
+        </h3>
+        
+        <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
+            <p class="text-sm text-blue-800">
+                <strong>Importante:</strong> Subí el archivo <strong>Turnos.xlsx</strong> actualizado por el sector de Compras. 
+                Este archivo se utilizará para validar las órdenes de compra.
+            </p>
+        </div>
+        
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar archivo Excel:</label>
+                <input type="file" id="excel_file" name="file" accept=".xlsx,.xls" required class="w-full p-2 border rounded-md">
+            </div>
+            
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 bg-green-600 text-white py-3 rounded font-bold hover:bg-green-700 transition flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-sm">cloud_upload</span>
+                    Subir y Actualizar
+                </button>
+                <button type="button" onclick="document.getElementById('uploadModal').classList.add('hidden')" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded font-bold hover:bg-gray-300">Cancelar</button>
+            </div>
+        </form>
+        
+        <div id="upload_status" class="mt-4 hidden"></div>
+    </div>
+</div>
+
+<!-- Modal for Proveedores -->
+<div id="proveedoresModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[100] flex items-center justify-center">
+    <div class="bg-white p-8 rounded-xl max-w-3xl w-full shadow-2xl max-h-[80vh] overflow-hidden flex flex-col">
+        <h3 class="text-xl font-bold mb-4 border-b pb-2">
+            <span class="material-symbols-outlined text-blue-600 mr-2">group</span>
+            Proveedores Registrados
+        </h3>
+        
+        <div class="mb-4">
+            <input type="text" id="search_proveedor" placeholder="Buscar por nombre o ID..." class="w-full p-2 border rounded-md shadow-sm">
+        </div>
+        
+        <div id="proveedores_list" class="flex-1 overflow-y-auto space-y-2 min-h-[200px]">
+            <p class="text-sm text-gray-400">Cargando...</p>
+        </div>
+        
+        <div class="mt-4 pt-4 border-t">
+            <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg mb-4">
+                <p class="text-sm text-amber-800">
+                    <strong>Nota:</strong> Las contraseñas se muestran al hacer clic en "Ver contraseña". Solo el supervisor puede verlas. Conserve esta información de forma segura.
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <button id="btn_sync_proveedores" class="flex-1 bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700 transition">
+                    Sincronizar con Excel
+                </button>
+                <button onclick="document.getElementById('proveedoresModal').classList.add('hidden')" class="flex-1 bg-gray-200 text-gray-800 py-2 rounded font-bold hover:bg-gray-300">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Password -->
+<div id="passwordModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[200] flex items-center justify-center">
+    <div class="bg-white p-8 rounded-xl max-w-md w-full shadow-2xl">
+        <h3 class="text-xl font-bold mb-4 border-b pb-2">Contraseña del Proveedor</h3>
+        <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4">
+            <p class="text-sm mb-2"><strong>Proveedor:</strong> <span id="pw_proveedor"></span></p>
+            <p class="text-sm mb-2"><strong>Nombre:</strong> <span id="pw_nombre"></span></p>
+            <div class="mt-3 p-3 bg-white border border-blue-300 rounded">
+                <p class="text-sm text-gray-500 mb-1">Contraseña:</p>
+                <p id="pw_password" class="text-2xl font-bold text-blue-700 tracking-wider"></p>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button id="btn_reset_password" class="flex-1 bg-amber-500 text-white py-2 rounded font-bold hover:bg-amber-600 transition">
+                Regenerar Contraseña
+            </button>
+            <button onclick="document.getElementById('passwordModal').classList.add('hidden')" class="flex-1 bg-gray-200 text-gray-800 py-2 rounded font-bold hover:bg-gray-300">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var currentShiftId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            locale: 'es',
+            slotMinTime: '07:00:00',
+            slotMaxTime: '14:00:00',
+            hiddenDays: [0, 6],
+            allDaySlot: false,
+            events: '/api/shifts',
+            eventClick: function(info) {
+                currentShiftId = info.event.id;
+                var props = info.event.extendedProps;
+                document.getElementById('m_oc').innerText = props.oc;
+                document.getElementById('m_prov').innerText = props.supplier;
+                document.getElementById('m_email').innerText = props.supplier_email || 'N/A';
+                document.getElementById('m_art').innerText = props.articulo || "N/A";
+                document.getElementById('m_planta').innerText = props.planta;
+                document.getElementById('m_pallets').innerText = props.pallets;
+                document.getElementById('m_cancel_reason').value = '';
+                document.getElementById('eventModal').classList.remove('hidden');
+            },
+            eventDidMount: function(info) {
+                var planta = info.event.extendedProps.planta;
+                if(planta && planta.toLowerCase().includes('barracas')) {
+                    info.el.style.backgroundColor = '#004f89';
+                    info.el.style.borderColor = '#004f89';
+                } else {
+                    info.el.style.backgroundColor = '#006e2d';
+                    info.el.style.borderColor = '#006e2d';
+                }
+            }
+        });
+        calendar.render();
+
+        // Load Excel info
+        loadExcelInfo();
+
+        // ==============================
+        // Excel Info
+        // ==============================
+        async function loadExcelInfo() {
+            try {
+                var res = await fetch('/api/excel_info');
+                var data = await res.json();
+                document.getElementById('lastUpdate').innerText = data.last_modified || 'Sin datos';
+                document.getElementById('totalOC').innerText = data.total_ocs || 0;
+            } catch(e) {
+                console.error(e);
+                document.getElementById('lastUpdate').innerText = 'Error al cargar';
+            }
+        }
+
+        // ==============================
+        // Planta Filter
+        // ==============================
+        document.getElementById('plantaFilter').addEventListener('change', function(e) {
+            var filter = e.target.value;
+            var events = calendar.getEvents();
+            events.forEach(function(event) {
+                if(filter === 'all' || (event.extendedProps.planta && event.extendedProps.planta.includes(filter))) {
+                    event.setProp('display', 'auto');
+                } else {
+                    event.setProp('display', 'none');
+                }
+            });
+        });
+
+        // ==============================
+        // Cancel Shift
+        // ==============================
+        document.getElementById('btn_cancel_shift').addEventListener('click', async function() {
+            var reason = document.getElementById('m_cancel_reason').value.trim();
+            if(!reason) {
+                alert("Por favor, ingresá un motivo de cancelación para notificar al proveedor.");
+                return;
+            }
+            if(confirm("¿Estás seguro de cancelar este turno? Se enviará un correo al proveedor.")) {
+                try {
+                    var res = await fetch('/api/cancel_shift', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({shift_id: currentShiftId, reason: reason})
+                    });
+                    var data = await res.json();
+                    if(res.ok) {
+                        alert(data.msg);
+                        document.getElementById('eventModal').classList.add('hidden');
+                        calendar.refetchEvents();
+                    } else {
+                        alert(data.error || "Ocurrió un error");
+                    }
+                } catch(e) {
+                    console.error(e);
+                    alert("Error de conexión");
+                }
+            }
+        });
+
+        // ==============================
+        // Blocked Days Management
+        // ==============================
+        document.getElementById('btn_open_block').addEventListener('click', function() {
+            loadBlockedDays();
+            document.getElementById('blockModal').classList.remove('hidden');
+        });
+
+        document.getElementById('btn_add_block').addEventListener('click', async function() {
+            var date = document.getElementById('block_date_input').value;
+            var reason = document.getElementById('block_reason_input').value.trim();
+            if (!date) {
+                alert("Seleccioná una fecha para bloquear.");
+                return;
+            }
+            if (!reason) {
+                reason = "Bloqueado por supervisor";
+            }
+            
+            try {
+                var res = await fetch('/api/blocked_days', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({date: date, reason: reason})
+                });
+                var data = await res.json();
+                if (res.ok) {
+                    alert("Día bloqueado exitosamente.");
+                    document.getElementById('block_date_input').value = '';
+                    document.getElementById('block_reason_input').value = '';
+                    loadBlockedDays();
+                } else {
+                    alert(data.error || "Error al bloquear el día.");
+                }
+            } catch(e) {
+                console.error(e);
+                alert("Error de conexión");
+            }
+        });
+
+        async function loadBlockedDays() {
+            var container = document.getElementById('blocked_days_list');
+            container.innerHTML = '<p class="text-sm text-gray-400">Cargando...</p>';
+            
+            try {
+                var res = await fetch('/api/blocked_days');
+                var days = await res.json();
+                
+                if (days.length === 0) {
+                    container.innerHTML = '<p class="text-sm text-gray-400 italic">No hay días bloqueados.</p>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                days.forEach(function(day) {
+                    var div = document.createElement('div');
+                    div.className = "flex justify-between items-center p-3 bg-amber-50 border border-amber-200 rounded-lg";
+                    div.innerHTML = '<div>' +
+                        '<p class="font-bold text-sm">' + day.date + '</p>' +
+                        '<p class="text-xs text-gray-500">' + (day.reason || 'Sin motivo') + '</p>' +
+                    '</div>' +
+                    '<button class="bg-red-100 text-red-600 px-3 py-1 rounded text-xs font-bold hover:bg-red-200 transition" data-id="' + day.id + '">Desbloquear</button>';
+                    
+                    div.querySelector('button').addEventListener('click', async function() {
+                        var dayId = this.getAttribute('data-id');
+                        if (confirm("¿Desbloquear este día?")) {
+                            var r = await fetch('/api/unblock_day/' + dayId, { method: 'POST' });
+                            if (r.ok) {
+                                loadBlockedDays();
+                            } else {
+                                alert("Error al desbloquear.");
+                            }
+                        }
+                    });
+                    
+                    container.appendChild(div);
+                });
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = '<p class="text-sm text-red-500">Error al cargar días bloqueados.</p>';
+            }
+        }
+
+        // ==============================
+        // Proveedores Management
+        // ==============================
+        var allProveedores = [];
+        var currentPasswordUserId = null;
+
+        document.getElementById('btn_open_proveedores').addEventListener('click', function() {
+            loadProveedores();
+            document.getElementById('proveedoresModal').classList.remove('hidden');
+        });
+
+        document.getElementById('search_proveedor').addEventListener('input', function(e) {
+            var search = e.target.value.toLowerCase();
+            renderProveedores(allProveedores.filter(function(p) {
+                return p.proveedor_id.toLowerCase().includes(search) || 
+                       (p.name && p.name.toLowerCase().includes(search));
+            }));
+        });
+
+        document.getElementById('btn_sync_proveedores').addEventListener('click', function() {
+            if (confirm('¿Sincronizar proveedores desde el Excel? Los nuevos proveedores serán creados automáticamente.')) {
+                location.reload();
+            }
+        });
+
+        async function loadProveedores() {
+            var container = document.getElementById('proveedores_list');
+            container.innerHTML = '<p class="text-sm text-gray-400">Cargando...</p>';
+            
+            try {
+                var res = await fetch('/api/proveedores');
+                allProveedores = await res.json();
+                renderProveedores(allProveedores);
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = '<p class="text-sm text-red-500">Error al cargar proveedores.</p>';
+            }
+        }
+
+        function renderProveedores(proveedores) {
+            var container = document.getElementById('proveedores_list');
+            
+            if (proveedores.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400 italic">No hay proveedores registrados.</p>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            proveedores.forEach(function(p) {
+                var statusBadge = p.first_login ? 
+                    '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-bold">Primera vez</span>' :
+                    '<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">Activo</span>';
+                
+                var div = document.createElement('div');
+                div.className = "flex justify-between items-center p-3 bg-gray-50 border border-gray-200 rounded-lg";
+                div.innerHTML = '<div class="flex-1">' +
+                    '<div class="flex items-center gap-2 mb-1">' +
+                        '<p class="font-bold text-sm">ID: ' + p.proveedor_id + '</p>' +
+                        statusBadge +
+                    '</div>' +
+                    '<p class="text-sm text-gray-700">' + (p.name || 'Sin nombre') + '</p>' +
+                    '<p class="text-xs text-gray-500">' + (p.email || 'Sin email') + ' | ' + (p.phone || 'Sin teléfono') + '</p>' +
+                '</div>' +
+                '<button class="bg-blue-600 text-white px-3 py-2 rounded text-xs font-bold hover:bg-blue-700 transition ml-3" data-id="' + p.id + '" data-name="' + (p.name || p.proveedor_id) + '" data-proveedor="' + p.proveedor_id + '">Ver Pass</button>';
+                
+                div.querySelector('button').addEventListener('click', function() {
+                    showPasswordModal(this.getAttribute('data-id'), this.getAttribute('data-proveedor'), this.getAttribute('data-name'));
+                });
+                
+                container.appendChild(div);
+            });
+        }
+
+        function showPasswordModal(userId, proveedorId, nombre) {
+            currentPasswordUserId = userId;
+            document.getElementById('pw_proveedor').innerText = proveedorId;
+            document.getElementById('pw_nombre').innerText = nombre;
+            document.getElementById('pw_password').innerText = '●●●●●●●●';
+            document.getElementById('passwordModal').classList.remove('hidden');
+            
+            getPassword(userId);
+        }
+
+        async function getPassword(userId) {
+            try {
+                var res = await fetch('/api/reset_password/' + userId, { method: 'POST' });
+                var data = await res.json();
+                if (res.ok) {
+                    document.getElementById('pw_password').innerText = data.password;
+                } else {
+                    document.getElementById('pw_password').innerText = 'Error';
+                }
+            } catch(e) {
+                console.error(e);
+                document.getElementById('pw_password').innerText = 'Error';
+            }
+        }
+
+        document.getElementById('btn_reset_password').addEventListener('click', function() {
+            if (confirm('¿Generar una nueva contraseña? La anterior dejará de funcionar.')) {
+                getPassword(currentPasswordUserId);
+            }
+        });
+
+        // ==============================
+        // Excel Upload
+        // ==============================
+        document.getElementById('btn_upload_excel').addEventListener('click', function() {
+            document.getElementById('uploadForm').reset();
+            document.getElementById('upload_status').classList.add('hidden');
+            document.getElementById('uploadModal').classList.remove('hidden');
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            var fileInput = document.getElementById('excel_file');
+            var file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Por favor seleccioná un archivo');
+                return;
+            }
+            
+            var formData = new FormData();
+            formData.append('file', file);
+            
+            var statusDiv = document.getElementById('upload_status');
+            statusDiv.classList.remove('hidden');
+            statusDiv.innerHTML = '<p class="text-blue-600">Subiendo archivo...</p>';
+            
+            try {
+                var res = await fetch('/api/upload_excel', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                var data = await res.json();
+                
+                if (res.ok) {
+                    statusDiv.innerHTML = '<p class="text-green-600 font-bold">¡Archivo actualizado exitosamente!</p>' +
+                        '<p class="text-sm text-gray-600">Nuevos proveedores creados: ' + data.nuevos_proveedores + '</p>';
+                    setTimeout(function() {
+                        document.getElementById('uploadModal').classList.add('hidden');
+                        loadExcelInfo();
+                        alert('Base de turnos actualizada. Recargá la página para ver los cambios.');
+                    }, 2000);
+                } else {
+                    statusDiv.innerHTML = '<p class="text-red-600 font-bold">Error: ' + (data.error || 'No se pudo actualizar') + '</p>';
+                }
+            } catch(e) {
+                console.error(e);
+                statusDiv.innerHTML = '<p class="text-red-600">Error de conexión</p>';
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
