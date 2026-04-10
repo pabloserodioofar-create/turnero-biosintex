@@ -60,7 +60,7 @@
                 Programa tu <br/><span class="text-primary">Entrega de Insumos</span>
             </h1>
             <p class="text-on-surface-variant max-w-xl text-lg mt-2">
-                Ingresá tu Orden de Compra para validar el material a entregar.
+                Seleccioná una de tus Órdenes de Compra para agendar el turno.
             </p>
         </header>
 
@@ -68,15 +68,18 @@
             <!-- Left Column: Selection Flow -->
             <div class="lg:col-span-7 space-y-8">
                 
-                <!-- Step 1: OC Input -->
+                <!-- Step 1: OC Selection Dropdown -->
                 <section class="bg-surface-container-low p-8 rounded-xl border border-blue-100">
                     <div class="flex items-center gap-3 mb-6">
                         <span class="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                        <h2 class="text-xl font-bold text-on-surface">Validar Orden de Compra</h2>
+                        <h2 class="text-xl font-bold text-on-surface">Seleccionar Orden de Compra</h2>
                     </div>
-                    <div class="flex gap-4">
-                        <input type="text" id="oc_input" placeholder="Ej. 10000045" class="w-full p-3 rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
-                        <button id="btn_verify_oc" class="bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-800 transition">Verificar</button>
+                    <div class="space-y-4">
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Órdenes de Compra Disponibles</label>
+                        <select id="oc_select" class="w-full p-3 rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                            <option value="">Cargando órdenes...</option>
+                        </select>
+                        <button id="btn_verify_oc" class="w-full bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-800 transition">Validar Selección</button>
                     </div>
                     <div id="error_oc" class="text-error text-sm mt-3 hidden font-bold"></div>
                 </section>
@@ -208,25 +211,82 @@
     const defaultMinDate = getMinDate();
     dateInput.min = defaultMinDate;
 
+    function getColumns(rows) {
+        if (!rows || rows.length === 0) return {};
+        const first = rows[0];
+        const keys = Object.keys(first);
+        return {
+            oc: keys.find(k => k.toLowerCase().includes('orden de compra')),
+            prov: keys.find(k => k.toLowerCase().includes('proveedor') && !k.toLowerCase().includes('nombre')),
+            art: keys.find(k => k.toLowerCase().includes('art') && k.toLowerCase().includes('culo')),
+            nom: keys.find(k => k.includes('Nombre_1')) || keys.find(k => k.toLowerCase().includes('material')),
+            planta: keys.find(k => k.toLowerCase().includes('lugar') || k.toLowerCase().includes('planta')),
+            qty: keys.find(k => k.toLowerCase().includes('pendiente')),
+            fechaNeed: keys.find(k => k.toLowerCase().includes('fecha entrega'))
+        };
+    }
+
     // CARGA DE DATOS DESDE GOOGLE
     async function loadData() {
         try {
             const res = await fetch(CONFIG.API_URL + "?action=get_all");
             db = await res.json();
             console.log("DB Cargada:", db);
+            populateOCDropdown();
         } catch (e) {
-            alert("Error cargando base de datos. Reintente.");
+            console.error(e);
+            alert("Error cargando base de datos. Pudo haber un problema de conexión con Google Sheets.");
         }
     }
     loadData();
 
+    function populateOCDropdown() {
+        const maestro = db.MAESTRO_OC || [];
+        const cols = getColumns(maestro);
+        const select = document.getElementById('oc_select');
+        select.innerHTML = '<option value="">-- Seleccioná una OC --</option>';
+
+        if (!cols.oc || !cols.prov) {
+            console.error("Columnas no detectadas automáticamente:", cols);
+            // Fallback manual si fallan los cabezales
+            select.innerHTML = '<option value="">Error: No se detectaron las columnas en el Excel</option>';
+            return;
+        }
+
+        const myProv = String(currentUser.proveedor_id);
+        
+        // Filtrar únicas y por proveedor
+        const seen = new Set();
+        const myOCs = maestro.filter(row => {
+            const rowProv = String(row[cols.prov]).trim();
+            const rowOC = String(row[cols.oc]).trim();
+            // Validamos que coincida el proveedor o si es admin (1000)
+            if ((rowProv === myProv || myProv === "1000") && !seen.has(rowOC)) {
+                seen.add(rowOC);
+                return true;
+            }
+            return false;
+        });
+
+        if (myOCs.length === 0) {
+            select.innerHTML = '<option value="">No tenés OCs pendientes</option>';
+        } else {
+            myOCs.forEach(opt => {
+                const el = document.createElement('option');
+                el.value = opt[cols.oc];
+                el.innerText = `OC: ${opt[cols.oc]} - ${opt[cols.nom] || 'Sin descripción'}`;
+                select.appendChild(el);
+            });
+        }
+    }
+
     // ==============================
-    // STEP 1: Verificar OC
+    // STEP 1: Verificar OC seleccionada
     // ==============================
     document.getElementById('btn_verify_oc').addEventListener('click', function() {
-        const ocTerm = document.getElementById('oc_input').value.trim();
+        const ocValue = document.getElementById('oc_select').value;
         const errorDiv = document.getElementById('error_oc');
-        if (!ocTerm || !db) return;
+        if (!ocValue || !db) return;
 
         // Reset
         document.getElementById('step_oc_select').classList.add('hidden');
@@ -234,32 +294,20 @@
         document.getElementById('summary_card').classList.add('hidden');
         currentOC = null;
 
-        // Buscar coincidencias
         const maestro = db.MAESTRO_OC || [];
-        // Intentar detectar columnas
-        const colOC = Object.keys(maestro[0] || {}).find(k => k.toLowerCase().includes('orden de compra'));
-        const colProv = Object.keys(maestro[0] || {}).find(k => k.toLowerCase().includes('proveedor') && !k.toLowerCase().includes('nombre'));
-        const colArt = Object.keys(maestro[0] || {}).find(k => k.toLowerCase().includes('art') && k.toLowerCase().includes('culo'));
-        const colNom = Object.keys(maestro[0] || {}).find(k => k.includes('Nombre_1'));
-        const colPlanta = Object.keys(maestro[0] || {}).find(k => k.toLowerCase().includes('lugar'));
-        const colQty = Object.keys(maestro[0] || {}).find(k => k.toLowerCase().includes('pendiente'));
-        const colFechaNeed = Object.keys(maestro[0] || {}).find(k => k.toLowerCase().includes('fecha entrega'));
+        const cols = getColumns(maestro);
 
-        const matches = maestro.filter(row => {
-            const rowOC = String(row[colOC]);
-            const rowProv = String(row[colProv]);
-            const myProv = String(currentUser.proveedor_id);
-            return rowOC.includes(ocTerm) && (rowProv === myProv || myProv === "1000");
-        });
+        // Buscar todos los renglones que coincidan con esa OC
+        const matches = maestro.filter(row => String(row[cols.oc]).trim() === ocValue.trim());
 
         if (matches.length === 0) {
-            errorDiv.innerText = "Orden de compra no encontrada o no pertenece a su número de proveedor.";
+            errorDiv.innerText = "Error validando la orden seleccionada.";
             errorDiv.classList.remove('hidden');
         } else if (matches.length > 1) {
-            showOcOptions(matches, {colOC, colArt, colNom, colPlanta, colQty, colFechaNeed});
+            showOcOptions(matches, cols);
             errorDiv.classList.add('hidden');
         } else {
-            selectOC(matches[0], {colOC, colArt, colNom, colPlanta, colQty, colFechaNeed});
+            selectOC(matches[0], cols);
             errorDiv.classList.add('hidden');
         }
     });
@@ -269,13 +317,13 @@
         container.innerHTML = '';
         options.forEach(opt => {
             const btn = document.createElement('button');
-            btn.className = "w-full text-left p-4 bg-white border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-all";
+            btn.className = "w-full text-left p-4 bg-white border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-all shadow-sm";
             btn.innerHTML = `
                 <div class="flex justify-between items-center text-sm">
                     <div>
-                        <p class="font-bold">OC: ${opt[cols.colOC]}</p>
-                        <p class="text-gray-600">${opt[cols.colNom]}</p>
-                        <p class="text-xs text-gray-400">Planta: ${opt[cols.colPlanta]} | Pendiente: ${opt[cols.colQty]}</p>
+                        <p class="font-bold">OC: ${opt[cols.oc]}</p>
+                        <p class="text-gray-600">${opt[cols.nom] || 'Sin nombre'}</p>
+                        <p class="text-xs text-gray-400 font-bold">Planta: ${opt[cols.planta]} | Pendiente: ${opt[cols.qty]}</p>
                     </div>
                     <span class="material-symbols-outlined text-primary">chevron_right</span>
                 </div>`;
@@ -287,15 +335,15 @@
 
     function selectOC(data, cols) {
         // Normalizar planta
-        let p = String(data[cols.colPlanta]).toUpperCase();
+        let p = String(data[cols.planta] || "").toUpperCase();
         let normalizedPlanta = p.includes('PIBERA') || p.includes('LELOIR') ? 'Pibera' : 'Barracas';
 
         currentOC = {
-            oc: data[cols.colOC],
-            articulo: data[cols.colNom],
+            oc: data[cols.oc],
+            articulo: data[cols.nom],
             planta: normalizedPlanta,
-            pendiente: data[cols.colQty],
-            fecha_necesidad: data[cols.colFechaNeed]
+            pendiente: data[cols.qty],
+            fecha_necesidad: data[cols.fechaNeed]
         };
 
         // Mostrar UI
@@ -313,11 +361,11 @@
         const restrictionMsg = document.getElementById('date_restriction_msg');
         if (currentOC.fecha_necesidad) {
             const dateObj = new Date(currentOC.fecha_necesidad);
-            if (!isNaN(dateObj)) {
+            if (!isNaN(dateObj.getTime())) {
                 const firstOfMonth = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1).toISOString().split('T')[0];
                 if (firstOfMonth > defaultMinDate) {
                     dateInput.min = firstOfMonth;
-                    restrictionMsg.innerText = "La necesidad es para el mes de " + dateObj.toLocaleString('es-ES', {month: 'long', year: 'numeric'});
+                    restrictionMsg.innerText = "La necesidad de presupuesto es para el mes de " + dateObj.toLocaleString('es-ES', {month: 'long', year: 'numeric'});
                     restrictionMsg.classList.remove('hidden');
                 } else {
                     dateInput.min = defaultMinDate;
@@ -345,8 +393,8 @@
 
         // Validaciones Básicas
         const d = new Date(date + "T12:00:00");
-        if (d.getDay() === 0 || d.getDay() === 6) { alert("Solo Lun a Vie"); dateInput.value = ""; return; }
-        if (CONFIG.FERIADOS_2026.includes(date)) { alert("Feriado"); dateInput.value = ""; return; }
+        if (d.getDay() === 0 || d.getDay() === 6) { alert("Los turnos son solo de Lunes a Viernes."); dateInput.value = ""; return; }
+        if (CONFIG.FERIADOS_2026.includes(date)) { alert("El día seleccionado es feriado."); dateInput.value = ""; return; }
 
         const requiredBlocks = Math.ceil(pallets / 5);
         const bookedShifts = (db.TURNOS || []).filter(s => s.fecha === date && s.planta === currentOC.planta && s.estado === 'Confirmado');
@@ -376,13 +424,13 @@
         selectedSlot = null;
         
         if (slots.length === 0 && dateInput.value) {
-            grid.innerHTML = '<p class="col-span-4 text-sm text-error font-bold">Sin disponibilidad para esta carga.</p>';
+            grid.innerHTML = '<p class="col-span-4 text-sm text-error font-bold text-center p-4 bg-red-50 rounded">No hay disponibilidad para esta fecha y cantidad de pallets.</p>';
             return;
         }
 
         slots.forEach(time => {
             const btn = document.createElement('button');
-            btn.className = "py-3 rounded bg-green-100 text-green-800 font-bold border border-green-200 hover:bg-green-200";
+            btn.className = "py-3 rounded bg-green-100 text-green-800 font-bold border border-green-200 hover:bg-green-200 transition-all";
             btn.innerText = time;
             btn.onclick = () => {
                 Array.from(grid.children).forEach(c => c.className = "py-3 rounded bg-green-100 text-green-800 font-bold border border-green-200");
@@ -428,16 +476,18 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert("Turno reservado con éxito.");
+                alert("¡Turno reservado exitosamente!");
                 window.location.reload();
             } else {
-                alert("Error: " + data.error);
+                alert("Error al reservar: " + data.error);
                 btn.disabled = false;
                 btn.innerText = "Confirmar Turno";
             }
         } catch (e) {
-            alert("Error de conexión con Google Sheets.");
+            console.error(e);
+            alert("Error de conexión con Google Sheets. Verificá que el script esté bien desplegado.");
             btn.disabled = false;
+            btn.innerText = "Confirmar Turno";
         }
     };
 
