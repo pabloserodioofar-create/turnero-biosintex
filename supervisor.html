@@ -91,75 +91,81 @@
         });
         calendar.render();
 
-        // Cargar eventos desde Google
-        try {
-            const res = await fetch(CONFIG.API_URL + "?action=get_all");
-            const db = await res.json();
-            const rows = db.TURNOS || [];
-            
-            // Función para normalizar hora (ej: 7:00 -> 07:00)
-            const fixTime = (t) => {
-                let time = String(t).trim();
-                // Google Sheets a veces manda las horas como "0.333333" o similar si no es texto
-                if (time.includes(':')) {
-                    let [h, m] = time.split(':');
-                    return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`;
-                }
-                return "08:00"; 
-            };
-
-            const events = rows.map((s, idx) => {
-                if (!s.fecha || !s.hora) return null;
-                if (String(s.estado).toLowerCase() === 'cancelado') return null;
-
-                // Normalizar Fecha
-                let d = new Date(s.fecha);
-                let dateStr = isNaN(d.getTime()) ? String(s.fecha).split('T')[0] : d.toISOString().split('T')[0];
+        async function safeLoadShifts() {
+            try {
+                console.log("Intentando cargar desde:", CONFIG.API_URL);
                 
-                // Normalizar Hora
-                let timeStr = fixTime(s.hora);
-
-                const color = String(s.planta).includes('Barracas') ? '#004f89' : '#006e2d';
-
-                return {
-                    id: s.id || idx,
-                    title: `OC: ${s.oc} - ${s.nombre_proveedor || s.ombre_proveed || 'S/N'}`,
-                    start: `${dateStr}T${timeStr}:00`,
-                    end: `${dateStr}T${String(parseInt(timeStr.split(':')[0]) + 1).padStart(2,'0')}:${timeStr.split(':')[1]}:00`,
-                    backgroundColor: color,
-                    borderColor: color,
-                    extendedProps: {
-                        supplier: s.nombre_proveedor || s.ombre_proveed || 'S/D',
-                        planta: s.planta,
-                        oc: s.oc,
-                        articulo: s.articulo,
-                        pallets: s.pallets
+                const res = await fetch(CONFIG.API_URL + "?action=get_all");
+                if (!res.ok) throw new Error("Respuesta no ok: " + res.status);
+                
+                const db = await res.json();
+                console.log("Datos:", db);
+                
+                const sheetKey = Object.keys(db).find(k => k.toLowerCase() === 'turnos');
+                if (!sheetKey) {
+                    alert("Error: No se encontró la pestaña 'TURNOS' en la planilla.");
+                    return;
+                }
+                
+                const rows = db[sheetKey] || [];
+                
+                const fixTime = (t) => {
+                    let time = String(t).trim();
+                    if (time.includes(':')) {
+                        let [h, m] = time.split(':');
+                        return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`;
                     }
+                    return "08:00"; 
                 };
-            }).filter(e => e !== null);
 
-            calendar.addEventSource(events);
+                const events = rows.map((s, idx) => {
+                    if (!s.fecha || !s.hora) return null;
+                    if (String(s.estado).toLowerCase() === 'cancelado') return null;
 
-            // Saltar al primer turno futuro si existe
-            if (events.length > 0) {
-                // Ordenar por fecha y buscar la más cercana
-                events.sort((a,b) => new Date(a.start) - new Date(b.start));
-                calendar.gotoDate(events[0].start);
+                    let d = new Date(s.fecha);
+                    let dateStr = isNaN(d.getTime()) ? String(s.fecha).split('T')[0] : d.toISOString().split('T')[0];
+                    let timeStr = fixTime(s.hora);
+                    const color = String(s.planta).includes('Barracas') ? '#004f89' : '#006e2d';
+
+                    return {
+                        id: s.id || idx,
+                        title: `OC: ${s.oc} - ${s.nombre_proveedor || s.ombre_proveed || 'S/N'}`,
+                        start: `${dateStr}T${timeStr}:00`,
+                        end: `${dateStr}T${String(parseInt(timeStr.split(':')[0]) + 1).padStart(2,'0')}:${timeStr.split(':')[1]}:00`,
+                        backgroundColor: color,
+                        borderColor: color,
+                        extendedProps: {
+                            supplier: s.nombre_proveedor || s.ombre_proveed || 'S/D',
+                            planta: s.planta,
+                            oc: s.oc,
+                            articulo: s.articulo,
+                            pallets: s.pallets
+                        }
+                    };
+                }).filter(e => e !== null);
+
+                calendar.addEventSource(events);
+
+                if (events.length > 0) {
+                    events.sort((a,b) => new Date(a.start) - new Date(b.start));
+                    calendar.gotoDate(events[0].start);
+                }
+
+                document.getElementById('plantaFilter').onchange = (e) => {
+                    const val = e.target.value;
+                    calendar.getEvents().forEach(ev => {
+                        if (val === 'all' || ev.extendedProps.planta === val) ev.setProp('display', 'auto');
+                        else ev.setProp('display', 'none');
+                    });
+                };
+
+            } catch (e) {
+                console.error("Error técnico detallado:", e);
+                alert("Error técnico: " + e.message + ". Revisa la consola (F12) para más detalles.");
             }
-
-            // Filtro de Planta
-            document.getElementById('plantaFilter').onchange = (e) => {
-                const val = e.target.value;
-                calendar.getEvents().forEach(ev => {
-                    if (val === 'all' || ev.extendedProps.planta === val) ev.setProp('display', 'auto');
-                    else ev.setProp('display', 'none');
-                });
-            };
-
-        } catch (e) {
-            console.error("Error cargando eventos:", e);
-            alert("No se pudieron cargar los turnos. Verifica la conexión con Google Sheets.");
         }
+        
+        safeLoadShifts();
     });
 
 </script>
