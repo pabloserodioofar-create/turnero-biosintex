@@ -109,56 +109,53 @@
                 
                 const rows = db[sheetKey] || [];
                 
+                // Convierte cualquier hora de Google Sheets a HH:mm
+                // Maneja formatos como: "7:00", "7:00:00", "7:00:00 a.m.", "07:00 AM"
                 const fixTime = (t) => {
-                    let time = String(t).trim();
-                    if (time.includes(':')) {
-                        let [h, m] = time.split(':');
-                        return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`;
+                    let raw = String(t).trim().toLowerCase();
+                    let isPM = raw.includes('p.m.') || raw.includes('pm');
+                    // Limpiar el sufijo AM/PM
+                    raw = raw.replace('a.m.','').replace('p.m.','').replace('am','').replace('pm','').trim();
+                    let parts = raw.split(':');
+                    if (parts.length >= 2) {
+                        let h = parseInt(parts[0]);
+                        let m = parts[1].padStart(2, '0');
+                        if (isPM && h < 12) h += 12;
+                        if (!isPM && h === 12) h = 0;
+                        return `${String(h).padStart(2,'0')}:${m}`;
                     }
-                    return "08:00"; 
+                    return "08:00";
+                };
+
+                // Convierte cualquier fecha de Google Sheets a YYYY-MM-DD
+                // Maneja: "9/6/2026" (D/M/YYYY), "2026-06-09", "09-06-2026", "2026/06/09", etc.
+                const fixDate = (f) => {
+                    let raw = String(f).trim().split('T')[0].split(' ')[0];
+                    let sep = raw.includes('/') ? '/' : raw.includes('-') ? '-' : null;
+                    if (!sep) return null;
+                    let parts = raw.split(sep);
+                    if (parts.length !== 3) return null;
+                    let [a, b, c] = parts;
+                    let year, month, day;
+                    if (a.length === 4) { // YYYY-MM-DD o YYYY/MM/DD
+                        year = a; month = b; day = c;
+                    } else if (c.length === 4) { // D/M/YYYY o DD-MM-YYYY
+                        year = c; month = b; day = a;
+                    } else {
+                        return null;
+                    }
+                    let result = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                    // Verificar que sea una fecha válida
+                    if (isNaN(new Date(result).getTime())) return null;
+                    return result;
                 };
 
                 const events = rows.map((s, idx) => {
                     if (!s.fecha || !s.hora) return null;
                     if (String(s.estado).toLowerCase() === 'cancelado') return null;
 
-                    let dateStr = "";
-                    let rawFecha = String(s.fecha).trim();
-                    
-                    // Asegurar YYYY-MM-DD
-                    if (rawFecha.includes('T')) {
-                        let parts = rawFecha.split('T')[0].split('-');
-                        if (parts.length === 3) dateStr = `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
-                    } else if (rawFecha.includes('-')) {
-                        let parts = rawFecha.split(' ')[0].split('-');
-                        if (parts.length === 3) {
-                            if (parts[0].length === 4) { // YYYY-MM-DD
-                                dateStr = `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
-                            } else { // DD-MM-YYYY
-                                dateStr = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-                            }
-                        }
-                    } else if (rawFecha.includes('/')) {
-                        let parts = rawFecha.split(' ')[0].split('/');
-                        if (parts.length === 3) {
-                            if (parts[0].length === 4) { // YYYY/MM/DD
-                                dateStr = `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
-                            } else { // DD/MM/YYYY
-                                dateStr = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-                            }
-                        }
-                    } else {
-                        // Fallback extremo
-                        try {
-                            let d = new Date(rawFecha);
-                            if (!isNaN(d.getTime())) {
-                                dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                            }
-                        } catch(e) {}
-                    }
-                    
-                    // Fallback to ensure we have a valid format YYYY-MM-DD
-                    if (!dateStr || dateStr.length !== 10) return null;
+                    let dateStr = fixDate(s.fecha);
+                    if (!dateStr) return null;
 
                     let timeStr = fixTime(s.hora);
                     const color = String(s.planta).includes('Barracas') ? '#004f89' : '#006e2d';
