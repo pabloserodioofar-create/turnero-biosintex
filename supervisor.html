@@ -99,11 +99,13 @@
                 if (!res.ok) throw new Error("Respuesta no ok: " + res.status);
                 
                 const db = await res.json();
-                console.log("Datos:", db);
+                console.log("Datos recibidos. Pestañas disponibles:", Object.keys(db));
                 
-                const sheetKey = Object.keys(db).find(k => k.toLowerCase() === 'turnos');
+                // Buscar la pestaña TURNOS de forma muy permisiva (ignora espacios, mayúsculas)
+                const sheetKey = Object.keys(db).find(k => k.trim().toLowerCase() === 'turnos');
+                console.log("Pestaña TURNOS encontrada como:", sheetKey);
                 if (!sheetKey) {
-                    alert("Error: No se encontró la pestaña 'TURNOS' en la planilla.");
+                    alert("Error: No se encontró la pestaña 'TURNOS'.\nPestañas disponibles: " + Object.keys(db).join(", "));
                     return;
                 }
                 
