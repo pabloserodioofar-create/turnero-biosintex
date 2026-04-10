@@ -55,13 +55,23 @@
 
 <main class="pt-24 pb-12 px-4 md:px-12 bg-surface min-h-screen">
     <div class="max-w-6xl mx-auto">
-        <header class="mb-12">
-            <h1 class="text-3xl md:text-5xl font-extrabold text-on-surface tracking-tighter mb-4">
-                Programa tu <br/><span class="text-primary">Entrega de Insumos</span>
-            </h1>
-            <p class="text-on-surface-variant max-w-xl text-lg mt-2">
-                Seleccioná una de tus Órdenes de Compra para agendar el turno.
-            </p>
+        <header class="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+                <h1 class="text-3xl md:text-5xl font-extrabold text-on-surface tracking-tighter mb-4">
+                    Programa tu <br/><span class="text-primary">Entrega de Insumos</span>
+                </h1>
+                <p class="text-on-surface-variant max-w-xl text-lg mt-2">
+                    Seleccioná una de tus Órdenes de Compra para agendar el turno.
+                </p>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex flex-col gap-3 min-w-[280px] shadow-sm">
+                <p class="text-[10px] font-bold text-blue-800 uppercase tracking-widest">Mis datos de contacto</p>
+                <div class="flex gap-2">
+                    <input type="email" id="prof_email" placeholder="Email" class="text-xs p-2 border rounded w-full">
+                    <input type="tel" id="prof_tel" placeholder="Teléfono" class="text-xs p-2 border rounded w-full">
+                </div>
+                <button onclick="saveProfile()" id="btn_save_prof" class="text-[10px] bg-primary text-white font-bold py-2 rounded hover:bg-blue-800 transition">ACTUALIZAR DATOS</button>
+            </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -193,6 +203,7 @@
     let db = null;
     let currentOC = null;
     let selectedSlot = null;
+    let blockedDates = [];
     const dateInput = document.getElementById('date_input');
     
     // Configurar fecha mínima (Hoy + 2 días hábiles)
@@ -238,10 +249,22 @@
 
     // CARGA DE DATOS DESDE GOOGLE
     async function loadData() {
+        // Cargar datos de perfil guardados
+        document.getElementById('prof_email').value = currentUser.email || "";
+        document.getElementById('prof_tel').value = currentUser.telefono || "";
+
         try {
             const res = await fetch(CONFIG.API_URL + "?action=get_all");
             db = await res.json();
             console.log("DB Cargada:", db);
+
+            // Cargar Bloqueos
+            const bKey = Object.keys(db).find(k => k.toLowerCase() === 'bloqueos');
+            if (bKey) {
+                blockedDates = db[bKey].map(b => String(b.fecha).split('T')[0]);
+                console.log("Días bloqueados:", blockedDates);
+            }
+
             populateOCDropdown();
         } catch (e) {
             console.error(e);
@@ -249,6 +272,39 @@
         }
     }
     loadData();
+
+    async function saveProfile() {
+        const btn = document.getElementById('btn_save_prof');
+        const email = document.getElementById('prof_email').value;
+        const tel = document.getElementById('prof_tel').value;
+
+        btn.disabled = true;
+        btn.innerText = "GUARDANDO...";
+
+        try {
+            const res = await fetch(CONFIG.API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'update_profile',
+                    username: currentUser.username,
+                    email: email,
+                    telefono: tel
+                })
+            });
+            const r = await res.json();
+            if (r.success) {
+                currentUser.email = email;
+                currentUser.telefono = tel;
+                localStorage.setItem('biosintex_session', JSON.stringify(currentUser));
+                alert("Datos actualizados correctamente.");
+            }
+        } catch (e) {
+            alert("Error al guardar perfil");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "ACTUALIZAR DATOS";
+        }
+    }
 
     function populateOCDropdown() {
         const maestro = db.MAESTRO_OC || [];
@@ -407,6 +463,7 @@
         const d = new Date(date + "T12:00:00");
         if (d.getDay() === 0 || d.getDay() === 6) { alert("Los turnos son solo de Lunes a Viernes."); dateInput.value = ""; return; }
         if (CONFIG.FERIADOS_2026.includes(date)) { alert("El día seleccionado es feriado."); dateInput.value = ""; return; }
+        if (blockedDates.includes(date)) { alert("Este día ha sido bloqueado por el supervisor."); dateInput.value = ""; return; }
 
         const requiredBlocks = Math.ceil(pallets / 5);
         const bookedShifts = (db.TURNOS || []).filter(s => s.fecha === date && s.planta === currentOC.planta && s.estado === 'Confirmado');
