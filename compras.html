@@ -184,24 +184,13 @@
             
             if(missing.length > 0) {
                 console.error("Faltan columnas:", missing);
-                return alert("No se encontraron las columnas: " + missing.join(", ") + ".\n\nAsegurate de que el Excel las tenga en la primera fila.");
+                return alert("No se encontraron las columnas críticas: " + missing.join(", ") + ".\n\nEl archivo debe contener estas columnas para que el sistema funcione.");
             }
-
-            // Si llegamos acá, mapeamos los datos originales a los nombres que espera Google
-            const finalData = data.map(item => {
-                const newItem = {};
-                rawHeaders.forEach(rh => {
-                    const norm = normalize(rh);
-                    const reqIdx = normalizedRequired.indexOf(norm);
-                    if (reqIdx !== -1) newItem[required[reqIdx]] = item[rh];
-                });
-                return newItem;
-            });
 
             try {
                 const res = await fetch(CONFIG.API_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'update_maestro', data: finalData })
+                    body: JSON.stringify({ action: 'update_maestro', data: data })
                 });
                 const r = await res.json();
                 if(r.success) {
