@@ -169,7 +169,12 @@
             
             console.log("Encabezados detectados en el archivo:", rawHeaders);
 
-            const required = ["OC", "Artículo", "Planta", "Pendiente"];
+            const required = [
+                "Orden de Compra", 
+                "Descripción del Artículo", 
+                "Lugar Recepción", 
+                "Cantidad Pendientede Entrega"
+            ];
             const normalizedRequired = required.map(h => normalize(h));
 
             const missing = [];
