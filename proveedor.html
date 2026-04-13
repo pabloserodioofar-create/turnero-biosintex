@@ -215,14 +215,20 @@
         async function loadData() {
             const res = await fetch(CONFIG.API_URL + "?action=get_all");
             db = await res.json();
-            renderOCs();
-            renderHistory();
-            blockedDates = (db.BLOQUEOS || []).map(b => b.fecha);
+            
+            // Buscar pestañas de forma flexible
+            const findK = (name) => Object.keys(db).find(k => k.trim().toLowerCase() === name);
+            const ocKey = findK('maestro_oc');
+            const turnosKey = findK('turnos');
+            const blockKey = findK('bloqueos');
+
+            renderOCs(ocKey);
+            renderHistory(turnosKey);
+            blockedDates = (db[blockKey] || []).map(b => b.fecha);
         }
 
-        function renderOCs() {
+        function renderOCs(ocKey) {
             const container = document.getElementById('oc-container');
-            const ocKey = Object.keys(db).find(k => k.toLowerCase() === 'maestro_oc');
             const userOrders = (db[ocKey] || []).filter(o => String(o.Proveedor).split('.')[0].trim() === String(currentUser.proveedor_id).trim());
 
             if (userOrders.length === 0) {
@@ -243,7 +249,8 @@
         }
 
         window.selectOC = (el, ocNumber) => {
-            const ocKey = Object.keys(db).find(k => k.toLowerCase() === 'maestro_oc');
+            const findK = (name) => Object.keys(db).find(k => k.trim().toLowerCase() === name);
+            const ocKey = findK('maestro_oc');
             currentOC = db[ocKey].find(o => o.OC === ocNumber);
             document.querySelectorAll('.oc-card').forEach(c => c.classList.remove('border-[#004f89]', 'bg-blue-50'));
             el.classList.add('border-[#004f89]', 'bg-blue-50');
@@ -271,25 +278,33 @@
             
             if (!date) { container.innerHTML = '<p class="col-span-full text-center text-xs text-gray-400 py-4">Seleccioná una fecha para ver horarios.</p>'; return; }
 
-            // Función interna para normalizar fechas de cualquier formato a YYYY-MM-DD
+            // Normalizador de fechas para comparar (evita problemas de zona horaria)
             const normalizeDate = (f) => {
-                let raw = String(f).trim().split('T')[0].split(' ')[0];
-                let parts = raw.split(/[\/-]/);
-                if (parts.length !== 3) return raw;
+                if(!f) return "";
+                let s = String(f).split('T')[0].split(' ')[0];
+                let parts = s.split(/[\/-]/);
+                if (parts.length !== 3) return s;
                 let [a, b, c] = parts;
                 return a.length === 4 ? `${a}-${b.padStart(2,'0')}-${c.padStart(2,'0')}` : `${c}-${b.padStart(2,'0')}-${a.padStart(2,'0')}`;
             };
 
-            const selectedDateStr = date;
-            
+            const selectedDateStr = normalizeDate(date);
             const isBlocked = blockedDates.some(b => normalizeDate(b) === selectedDateStr);
-            if (isBlocked) { container.innerHTML = '<div class="col-span-full bg-red-50 text-red-600 p-4 rounded-xl text-center text-xs font-bold border border-red-100 italic">Día bloqueado por el supervisor por tareas de distribución interna.</div>'; return; }
+            console.log("Chequeando bloqueo para:", selectedDateStr, "Bloqueados:", blockedDates.map(normalizeDate));
+
+            if (isBlocked) { 
+                container.innerHTML = '<div class="col-span-full bg-red-50 text-red-600 p-6 rounded-2xl text-center border-2 border-red-100"><p class="text-sm font-black">🚫 FECHA BLOQUEADA</p><p class="text-xs font-medium mt-1">Biosintex no recibe mercadería ese día por tareas internas.</p></div>'; 
+                return; 
+            }
 
             const requiredBlocks = Math.ceil(pallets / 5);
             const allSlots = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00"];
             
             const bookedTimes = new Set();
-            (db.TURNOS || []).forEach(s => {
+            const findK = (name) => Object.keys(db).find(k => k.trim().toLowerCase() === name);
+            const turnosKey = findK('turnos');
+
+            (db[turnosKey] || []).forEach(s => {
                 const sDateStr = normalizeDate(s.fecha);
                 if (sDateStr === selectedDateStr && s.planta === currentOC.Planta && String(s.estado).toLowerCase().trim() === 'confirmado') {
                     const startIdx = allSlots.indexOf(s.hora);
@@ -348,9 +363,9 @@
             } catch(e) { alert("Error: " + e.message); btn.disabled = false; btn.innerText = "Confirmar Reserva"; }
         };
 
-        function renderHistory() {
+        function renderHistory(turnosKey) {
             const body = document.getElementById('history-body');
-            const history = (db.TURNOS || []).filter(s => String(s.proveedor_id).trim() === String(currentUser.proveedor_id).trim());
+            const history = (db[turnosKey] || []).filter(s => String(s.proveedor_id).trim() === String(currentUser.proveedor_id).trim());
             
             if (history.length === 0) { body.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-400 italic font-medium">No tenés entregas confirmadas.</td></tr>'; return; }
 
