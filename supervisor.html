@@ -36,7 +36,12 @@
                 <h1 class="text-4xl font-extrabold text-[#0b1c30] tracking-tight">Panel de <span class="text-[#004f89]">Supervisor</span></h1>
                 <p class="text-gray-500 mt-2 font-medium">Control total de logística y recepciones</p>
             </div>
-            <div class="flex gap-3">
+            <div class="flex flex-wrap items-center gap-3">
+                <select id="plantaFilter" class="p-2.5 border border-gray-200 rounded-xl shadow-sm focus:border-[#004f89] text-sm font-bold bg-white">
+                    <option value="all">Todas las Plantas</option>
+                    <option value="Barracas">Planta Barracas</option>
+                    <option value="Pibera">Planta Pibera</option>
+                </select>
                 <button onclick="openBlockModal()" class="bg-amber-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-amber-700 transition flex items-center gap-2 shadow-sm">
                     <span class="material-symbols-outlined">block</span>
                     Bloquear Jornada
