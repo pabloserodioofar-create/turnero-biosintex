@@ -24,7 +24,7 @@
         <span class="text-[#004f89] font-extrabold text-xl tracking-tighter">Biosintex Supervisor</span>
     </div>
     <div class="flex items-center gap-4">
-        <span class="text-sm font-bold text-gray-500" id="user-display">Panel Gerencial</span>
+        <span class="text-sm font-bold text-gray-500" id="top-user-display">Panel Gerencial</span>
         <a href="#" onclick="logout(); return false;" class="text-red-600 font-medium hover:underline text-sm border px-3 py-1 rounded">Cerrar Sesión</a>
     </div>
 </header>
@@ -34,14 +34,13 @@
         <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
                 <h1 class="text-4xl font-extrabold text-[#0b1c30] tracking-tight">Panel de <span class="text-[#004f89]">Supervisor</span></h1>
-                <p class="text-gray-500 mt-2 font-medium">Control total de logística y recepciones</p>
+                <p class="text-gray-500 mt-2 font-medium">Control total de logística e usuarios</p>
             </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <select id="plantaFilter" class="p-2.5 border border-gray-200 rounded-xl shadow-sm focus:border-[#004f89] text-sm font-bold bg-white">
-                    <option value="all">Todas las Plantas</option>
-                    <option value="Barracas">Planta Barracas</option>
-                    <option value="Pibera">Planta Pibera</option>
-                </select>
+            <div class="flex gap-3">
+                <button onclick="openUserModal()" class="bg-[#004f89] text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-900 transition flex items-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Nuevo Proveedor
+                </button>
                 <button onclick="openBlockModal()" class="bg-amber-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-amber-700 transition flex items-center gap-2 shadow-sm">
                     <span class="material-symbols-outlined">block</span>
                     Bloquear Jornada
@@ -53,28 +52,51 @@
             </div>
         </header>
 
-        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-6">
+            <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                <h2 class="font-bold text-gray-700">Visor de Calendario</h2>
+                <select id="plantaFilter" class="p-2 border rounded-lg text-xs font-bold">
+                    <option value="all">Todas las Plantas</option>
+                    <option value="Barracas">Barracas</option>
+                    <option value="Pibera">Pibera</option>
+                </select>
+            </div>
             <div id='calendar'></div>
         </div>
     </div>
 </main>
 
-<!-- Modal de Detalles del Turno -->
-<div id="eventModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+<!-- Modal Nuevo Usuario -->
+<div id="userModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
         <div class="bg-[#004f89] p-6 text-white flex justify-between items-center">
-            <h3 class="text-xl font-bold">Detalles del Turno</h3>
-            <button onclick="closeModal()" class="hover:bg-white/20 rounded-full p-1"><span class="material-symbols-outlined">close</span></button>
+            <h3 class="text-xl font-bold text-white">Alta de Proveedor</h3>
+            <button onclick="closeUserModal()" class="hover:bg-white/20 rounded-full p-1"><span class="material-symbols-outlined">close</span></button>
         </div>
-        <div class="p-6 space-y-4" id="modalContent">
-            <!-- Cargado por JS -->
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase">Nombre de Empresa</label>
+                <input type="text" id="newNombre" class="w-full mt-1 border-gray-300 rounded-lg shadow-sm" placeholder="Ej: Barrier Solution S.A.">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase">ID Proveedor (para OC)</label>
+                <input type="text" id="newProvId" class="w-full mt-1 border-gray-300 rounded-lg shadow-sm" placeholder="Ej: 3936">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase">Username (Login)</label>
+                <input type="text" id="newUser" class="w-full mt-1 border-gray-300 rounded-lg shadow-sm" placeholder="Ej: barrier">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase">Contraseña</label>
+                <div class="flex gap-2 mt-1">
+                    <input type="text" id="newPass" class="flex-1 border-gray-300 rounded-lg font-mono shadow-sm">
+                    <button onclick="generatePass()" class="bg-gray-200 p-2 rounded-lg hover:bg-gray-300 text-gray-700" title="Generar Clave"><span class="material-symbols-outlined">autorenew</span></button>
+                </div>
+            </div>
         </div>
         <div class="bg-gray-50 p-4 border-t flex justify-end gap-3">
-            <button onclick="closeModal()" class="px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg transition">Cerrar</button>
-            <button id="btnCancelarTurno" class="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">cancel</span>
-                Cancelar Turno
-            </button>
+            <button onclick="closeUserModal()" class="px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg transition">Cerrar</button>
+            <button id="btnSaveUser" class="px-4 py-2 bg-[#004f89] text-white font-bold rounded-lg hover:bg-blue-900 transition shadow-sm">Crear Usuario</button>
         </div>
     </div>
 </div>
@@ -108,12 +130,27 @@
     </div>
 </div>
 
+<!-- Modal de Detalles del Turno -->
+<div id="eventModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="bg-[#004f89] p-6 text-white flex justify-between items-center">
+            <h3 class="text-xl font-bold">Detalles del Turno</h3>
+            <button onclick="closeModal()" class="hover:bg-white/20 rounded-full p-1"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="p-6 space-y-4" id="modalContent"></div>
+        <div class="bg-gray-50 p-4 border-t flex justify-end gap-3">
+            <button onclick="closeModal()" class="px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg transition">Cerrar</button>
+            <button id="btnCancelarTurno" class="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">cancel</span> Cancelar Turno
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // SESIÓN
     const sessionStr = localStorage.getItem('biosintex_session');
     if (!sessionStr) window.location.href = 'login.html';
     const currentUser = JSON.parse(sessionStr);
-    if (currentUser.rol !== 'supervisor') window.location.href = 'proveedor.html';
 
     function logout() {
         localStorage.removeItem('biosintex_session');
@@ -121,293 +158,124 @@
     }
 
     var calendar;
-    var globalDB = {}; // Para guardar usuarios y poder buscarlos
+    var globalDB = {};
 
     document.addEventListener('DOMContentLoaded', async function() {
         const calendarEl = document.getElementById('calendar');
         calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
-            locale: 'es',
-            slotMinTime: '07:00:00',
-            slotMaxTime: '14:00:00',
-            hiddenDays: [0, 6],
-            allDaySlot: false,
-            headerToolbar: {
-                left: 'prev,next',
-                center: 'title',
-                right: 'timeGridWeek,dayGridMonth'
-            },
-            eventClick: function(info) {
-                showEventDetails(info.event);
-            }
+            initialView: 'timeGridWeek', locale: 'es',
+            slotMinTime: '07:00:00', slotMaxTime: '14:00:00',
+            hiddenDays: [0, 6], allDaySlot: false,
+            headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
+            eventClick: (info) => showEventDetails(info.event)
         });
         calendar.render();
 
-        window.closeModal = () => {
-            document.getElementById('eventModal').classList.add('hidden');
-        };
-
+        window.closeModal = () => document.getElementById('eventModal').classList.add('hidden');
         window.openBlockModal = () => document.getElementById('blockModal').classList.remove('hidden');
         window.closeBlockModal = () => document.getElementById('blockModal').classList.add('hidden');
+        window.openUserModal = () => document.getElementById('userModal').classList.remove('hidden');
+        window.closeUserModal = () => document.getElementById('userModal').classList.add('hidden');
+
+        window.generatePass = () => {
+            const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            let retVal = "";
+            for (let i = 0; i < 8; ++i) retVal += charset.charAt(Math.floor(Math.random() * charset.length));
+            document.getElementById('newPass').value = retVal;
+        };
+
+        document.getElementById('btnSaveUser').onclick = async () => {
+            const data = {
+                action: 'add_user',
+                nombre: document.getElementById('newNombre').value,
+                proveedor_id: document.getElementById('newProvId').value,
+                username: document.getElementById('newUser').value,
+                password: document.getElementById('newPass').value,
+                rol: 'proveedor'
+            };
+            if(!data.username || !data.password || !data.proveedor_id) return alert("Complete todos los campos.");
+            const btn = document.getElementById('btnSaveUser');
+            btn.innerText = "Guardando..."; btn.disabled = true;
+            try {
+                const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+                if((await res.json()).success) { alert("¡Usuario creado!"); location.reload(); }
+            } catch(e) { alert("Error: " + e.message); }
+            finally { btn.innerText = "Crear Usuario"; btn.disabled = false; }
+        };
 
         document.getElementById('btnSaveBlock').onclick = async () => {
-            const date = document.getElementById('blockDate').value;
-            const motive = document.getElementById('blockReason').value;
-            if(!date) return alert("Seleccione una fecha");
-            
-            const btn = document.getElementById('btnSaveBlock');
-            btn.innerText = "Guardando..."; btn.disabled = true;
-
+            const data = { action: 'block_day', fecha: document.getElementById('blockDate').value, motivo: document.getElementById('blockReason').value };
+            if(!data.fecha) return alert("Seleccione fecha.");
             try {
-                const res = await fetch(CONFIG.API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'block_day', fecha: date, motivo: motive })
-                });
-                if((await res.json()).success) {
-                    alert("Fecha bloqueada exitosamente");
-                    closeBlockModal();
-                }
-            } catch(e) { alert("Error: " + e.message); }
-            finally { btn.innerText = "Confirmar Bloqueo"; btn.disabled = false; }
+                const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+                if((await res.json()).success) { alert("Día bloqueado."); location.reload(); }
+            } catch(e) { alert(e.message); }
         };
 
         window.showEventDetails = (event) => {
             const p = event.extendedProps;
             const start = event.start;
-            const content = document.getElementById('modalContent');
-            
-            // Buscar datos de contacto en USUARIOS
             const supplierData = (globalDB.USUARIOS || []).find(u => String(u.proveedor_id).trim() === String(p.supplier_id).trim());
-            const email = supplierData ? supplierData.email : 'No cargado';
-            const tel = supplierData ? supplierData.telefono : 'No cargado';
-
-            content.innerHTML = `
+            document.getElementById('modalContent').innerHTML = `
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2 bg-blue-50 p-3 rounded-lg border border-blue-100 mb-2">
+                    <div class="col-span-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
                         <p class="text-xs text-blue-600 font-bold uppercase mb-1">Contacto del Proveedor</p>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="material-symbols-outlined text-sm">mail</span>
-                            <span class="font-semibold text-sm">${email}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-sm">call</span>
-                            <span class="font-semibold text-sm">${tel}</span>
-                        </div>
+                        <p class="text-sm font-semibold">📧 ${supplierData?.email || 'No cargado'}</p>
+                        <p class="text-sm font-semibold">📞 ${supplierData?.telefono || 'No cargado'}</p>
                     </div>
-                    <div><p class="text-xs text-gray-500 font-bold uppercase">Proveedor</p><p class="font-semibold">${p.supplier}</p></div>
-                    <div><p class="text-xs text-gray-500 font-bold uppercase">Planta</p><p class="font-semibold">${p.planta}</p></div>
-                    <div><p class="text-xs text-gray-500 font-bold uppercase">Fecha y Hora</p><p class="font-semibold">${start.toLocaleDateString()} - ${start.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} hs</p></div>
-                    <div><p class="text-xs text-gray-500 font-bold uppercase">Orden de Compra</p><p class="font-bold text-[#004f89]">${p.oc}</p></div>
-                    <div class="col-span-2"><p class="text-xs text-gray-500 font-bold uppercase">Material</p><p class="font-semibold">${p.articulo}</p></div>
-                    <div class="col-span-2"><p class="text-xs text-gray-500 font-bold uppercase">Pallets</p><div class="bg-gray-50 p-2 rounded border font-bold text-gray-800">${p.pallets} Pallets</div></div>
-                </div>
-            `;
-
-            const btn = document.getElementById('btnCancelarTurno');
-            btn.onclick = async () => {
-                if(!confirm(`¿Seguro que desea cancelar el turno de ${p.supplier}?\nEsta acción se reflejará en la planilla de Google automáticamente.`)) return;
-                
-                btn.disabled = true;
-                btn.innerHTML = "Cancelando...";
-                
+                    <div><p class="text-xs text-gray-500 font-bold uppercase">Proveedor</p><p class="font-semibold text-sm">${p.supplier}</p></div>
+                    <div><p class="text-xs text-gray-500 font-bold uppercase">Planta</p><p class="font-semibold text-sm">${p.planta}</p></div>
+                    <div><p class="text-xs text-gray-500 font-bold uppercase">OC</p><p class="font-bold text-[#004f89] text-sm">${p.oc}</p></div>
+                    <div><p class="text-xs text-gray-500 font-bold uppercase">Pallets</p><p class="font-bold text-sm text-gray-800">${p.pallets}</p></div>
+                    <div class="col-span-2"><p class="text-xs text-gray-500 font-bold uppercase">Material</p><p class="text-xs text-gray-600">${p.articulo}</p></div>
+                </div>`;
+            
+            document.getElementById('btnCancelarTurno').onclick = async () => {
+                if(!confirm("¿Cancelar este turno?")) return;
                 try {
-                    const res = await fetch(CONFIG.API_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'cancel_shift', id: event.id })
-                    });
-                    const r = await res.json();
-                    if(r.success) {
-                        event.remove();
-                        closeModal();
-                        alert("Turno cancelado exitosamente.");
-                    } else throw new Error(r.error);
-                } catch(e) {
-                    alert("Error al cancelar: " + e.message);
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = '<span class="material-symbols-outlined text-sm">cancel</span> Cancelar Turno';
-                }
+                    const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action: 'cancel_shift', id: event.id }) });
+                    if((await res.json()).success) { alert("Turno cancelado."); event.remove(); closeModal(); }
+                } catch(e) { alert(e.message); }
             };
-
             document.getElementById('eventModal').classList.remove('hidden');
         };
 
-        async function safeLoadShifts() {
-            try {
-                console.log("Intentando cargar desde:", CONFIG.API_URL);
-                
-                const res = await fetch(CONFIG.API_URL + "?action=get_all");
-                if (!res.ok) throw new Error("Respuesta no ok: " + res.status);
-                
-                const db = await res.json();
-                globalDB = db; // Guardar para búsquedas
-                console.log("Datos recibidos. Pestañas disponibles:", Object.keys(db));
-                
-                // Buscar la pestaña TURNOS de forma muy permisiva (ignora espacios, mayúsculas)
-                const sheetKey = Object.keys(db).find(k => k.trim().toLowerCase() === 'turnos');
-                console.log("Pestaña TURNOS encontrada como:", sheetKey);
-                if (!sheetKey) {
-                    alert("Error: No se encontró la pestaña 'TURNOS'.\nPestañas disponibles: " + Object.keys(db).join(", "));
-                    return;
-                }
-                
-                const rows = db[sheetKey] || [];
-                
-                // Cargar Bloqueos como eventos grises
-                const blockKey = Object.keys(db).find(k => k.trim().toLowerCase() === 'bloqueos');
-                const blockEvents = (db[blockKey] || []).map((b, bIdx) => {
-                    let bDate = new Date(b.fecha);
-                    let bDateStr = isNaN(bDate) ? String(b.fecha).split('T')[0] : bDate.toISOString().split('T')[0];
-                    return {
-                        title: `BLOQUEADO: ${b.motivo || 'Motivo interno'}`,
-                        start: bDateStr,
-                        allDay: true,
-                        backgroundColor: '#9ca3af',
-                        display: 'background'
-                    };
+        async function loadData() {
+            const res = await fetch(CONFIG.API_URL + "?action=get_all");
+            globalDB = await res.json();
+            
+            const events = (globalDB.TURNOS || []).filter(s => String(s.estado).toLowerCase().trim() !== 'cancelado').map(s => {
+                const pCount = parseInt(s.pallets) || 1;
+                const endHours = Math.ceil(pCount / 5);
+                const startStr = `${s.fecha}T${s.hora}:00`;
+                let endDate = new Date(startStr);
+                endDate.setHours(endDate.getHours() + endHours);
+                const pad = (n) => String(n).padStart(2,'0');
+                const endStr = `${endDate.getFullYear()}-${pad(endDate.getMonth()+1)}-${pad(endDate.getDate())}T${pad(endDate.getHours())}:${pad(endDate.getMinutes())}:00`;
+                const color = String(s.planta).includes('Barracas') ? '#004f89' : '#006e2d';
+                return {
+                    id: s.id, title: `OC: ${s.oc} (${pCount}p)`, start: startStr, end: endStr, backgroundColor: color, borderColor: 'transparent',
+                    extendedProps: { supplier: s.nombre_proveedor, supplier_id: s.proveedor_id, planta: s.planta, oc: s.oc, articulo: s.articulo, pallets: pCount }
+                };
+            });
+
+            const blocks = (globalDB.BLOQUEOS || []).map(b => ({
+                title: 'BLOQUEADO: ' + b.motivo, start: b.fecha, allDay: true, backgroundColor: '#9ca3af', display: 'background'
+            }));
+
+            calendar.addEventSource(events);
+            calendar.addEventSource(blocks);
+
+            document.getElementById('plantaFilter').onchange = (e) => {
+                const val = e.target.value;
+                calendar.getEvents().forEach(ev => {
+                    if (val === 'all' || ev.extendedProps.planta === val) ev.setProp('display', 'auto');
+                    else if(ev.extendedProps.planta) ev.setProp('display', 'none');
                 });
-                
-                // Convierte cualquier hora de Google Sheets a HH:mm
-                // Maneja formatos como: "7:00", "7:00:00", "7:00:00 a.m.", "07:00 AM"
-                const fixTime = (t) => {
-                    let raw = String(t).trim().toLowerCase();
-                    let isPM = raw.includes('p.m.') || raw.includes('pm');
-                    // Limpiar el sufijo AM/PM
-                    raw = raw.replace('a.m.','').replace('p.m.','').replace('am','').replace('pm','').trim();
-                    let parts = raw.split(':');
-                    if (parts.length >= 2) {
-                        let h = parseInt(parts[0]);
-                        let m = parts[1].padStart(2, '0');
-                        if (isPM && h < 12) h += 12;
-                        if (!isPM && h === 12) h = 0;
-                        return `${String(h).padStart(2,'0')}:${m}`;
-                    }
-                    return "08:00";
-                };
-
-                // Convierte cualquier fecha de Google Sheets a YYYY-MM-DD
-                // Maneja: "9/6/2026" (D/M/YYYY), "2026-06-09", "09-06-2026", "2026/06/09", etc.
-                const fixDate = (f) => {
-                    let raw = String(f).trim().split('T')[0].split(' ')[0];
-                    let sep = raw.includes('/') ? '/' : raw.includes('-') ? '-' : null;
-                    if (!sep) return null;
-                    let parts = raw.split(sep);
-                    if (parts.length !== 3) return null;
-                    let [a, b, c] = parts;
-                    let year, month, day;
-                    if (a.length === 4) { // YYYY-MM-DD o YYYY/MM/DD
-                        year = a; month = b; day = c;
-                    } else if (c.length === 4) { // D/M/YYYY o DD-MM-YYYY
-                        year = c; month = b; day = a;
-                    } else {
-                        return null;
-                    }
-                    let result = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                    // Verificar que sea una fecha válida
-                    if (isNaN(new Date(result).getTime())) return null;
-                    return result;
-                };
-
-                console.log(`Total filas en TURNOS: ${rows.length}`);
-
-                const events = rows.map((s, idx) => {
-                    // Log de cada fila para diagnosticar
-                    console.log(`Fila ${idx}:`, {
-                        fecha_raw: s.fecha,
-                        hora_raw: s.hora,
-                        estado: s.estado,
-                        planta: s.planta,
-                        oc: s.oc
-                    });
-
-                    if (!s.fecha || !s.hora) {
-                        console.warn(`Fila ${idx} descartada: fecha u hora vacía`);
-                        return null;
-                    }
-                    if (String(s.estado).toLowerCase() === 'cancelado') {
-                        console.warn(`Fila ${idx} descartada: estado cancelado`);
-                        return null;
-                    }
-
-                    let dateStr = fixDate(s.fecha);
-                    console.log(`Fila ${idx} fecha parseada:`, dateStr);
-                    if (!dateStr) {
-                        console.warn(`Fila ${idx} descartada: no se pudo parsear la fecha "${s.fecha}"`);
-                        return null;
-                    }
-
-                    let timeStr = fixTime(s.hora);
-                    console.log(`Fila ${idx} hora parseada:`, timeStr);
-
-                    const pCount = parseInt(s.pallets) || 1;
-                    const endHours = Math.ceil(pCount / 5);
-                    const color = String(s.planta).includes('Barracas') ? '#004f89' : '#006e2d';
-
-                    let startStr = `${dateStr}T${timeStr}:00`;
-
-                    // Calcular fin del turno en hora LOCAL para evitar desfase de zona horaria
-                    let endDate = new Date(startStr);
-                    endDate.setHours(endDate.getHours() + endHours);
-                    
-                    const pad = (n) => String(n).padStart(2, '0');
-                    let endStr = `${endDate.getFullYear()}-${pad(endDate.getMonth()+1)}-${pad(endDate.getDate())}T${pad(endDate.getHours())}:${pad(endDate.getMinutes())}:00`;
-
-                    console.log(`Fila ${idx} start=${startStr}, end=${endStr}`);
-
-                    if (isNaN(new Date(startStr).getTime())) {
-                        console.warn(`Fila ${idx} descartada: startStr inválido "${startStr}"`);
-                        return null;
-                    }
-
-                    return {
-                        id: s.id || idx,
-                        title: `OC: ${s.oc} - ${s.nombre_proveedor || 'S/N'}`,
-                        start: startStr,
-                        end: endStr,
-                        backgroundColor: color,
-                        borderColor: 'transparent',
-                        extendedProps: {
-                            supplier: s.nombre_proveedor || 'S/D',
-                            supplier_id: s.proveedor_id,
-                            planta: s.planta,
-                            oc: s.oc,
-                            articulo: s.articulo,
-                            pallets: pCount
-                        }
-                    };
-                }).filter(e => e !== null);
-
-                console.log(`Eventos válidos para el calendario: ${events.length}`, events);
-
-                calendar.addEventSource(events);
-                calendar.addEventSource(blockEvents);
-
-                if (events.length > 0) {
-                    events.sort((a,b) => new Date(a.start) - new Date(b.start));
-                    try {
-                        calendar.gotoDate(new Date(events[0].start));
-                    } catch(gotoErr) {
-                        console.error("Error en gotoDate:", gotoErr);
-                    }
-                }
-
-                document.getElementById('plantaFilter').onchange = (e) => {
-                    const val = e.target.value;
-                    calendar.getEvents().forEach(ev => {
-                        if (val === 'all' || ev.extendedProps.planta === val) ev.setProp('display', 'auto');
-                        else ev.setProp('display', 'none');
-                    });
-                };
-
-            } catch (e) {
-                console.error("Error técnico detallado:", e);
-                alert("Error técnico: " + e.message + ". Revisa la consola (F12) para más detalles.");
-            }
+            };
         }
-        
-        safeLoadShifts();
+        loadData();
     });
-
 </script>
 </body>
 </html>
