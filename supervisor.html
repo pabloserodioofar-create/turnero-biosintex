@@ -230,6 +230,20 @@
                 
                 const rows = db[sheetKey] || [];
                 
+                // Cargar Bloqueos como eventos grises
+                const blockKey = Object.keys(db).find(k => k.trim().toLowerCase() === 'bloqueos');
+                const blockEvents = (db[blockKey] || []).map((b, bIdx) => {
+                    let bDate = new Date(b.fecha);
+                    let bDateStr = isNaN(bDate) ? String(b.fecha).split('T')[0] : bDate.toISOString().split('T')[0];
+                    return {
+                        title: `BLOQUEADO: ${b.motivo || 'Motivo interno'}`,
+                        start: bDateStr,
+                        allDay: true,
+                        backgroundColor: '#9ca3af',
+                        display: 'background'
+                    };
+                });
+                
                 // Convierte cualquier hora de Google Sheets a HH:mm
                 // Maneja formatos como: "7:00", "7:00:00", "7:00:00 a.m.", "07:00 AM"
                 const fixTime = (t) => {
@@ -304,6 +318,7 @@
 
                     const pCount = parseInt(s.pallets) || 1;
                     const endHours = Math.ceil(pCount / 5);
+                    const color = String(s.planta).includes('Barracas') ? '#004f89' : '#006e2d';
 
                     let startStr = `${dateStr}T${timeStr}:00`;
                     
@@ -339,6 +354,7 @@
                 console.log(`Eventos válidos para el calendario: ${events.length}`, events);
 
                 calendar.addEventSource(events);
+                calendar.addEventSource(blockEvents);
 
                 if (events.length > 0) {
                     events.sort((a,b) => new Date(a.start) - new Date(b.start));
