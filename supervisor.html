@@ -325,6 +325,8 @@
                     const endHours = Math.ceil(pCount / 5);
                     const color = String(s.planta).includes('Barracas') ? '#004f89' : '#006e2d';
 
+                    let startStr = `${dateStr}T${timeStr}:00`;
+
                     // Calcular fin del turno en hora LOCAL para evitar desfase de zona horaria
                     let endDate = new Date(startStr);
                     endDate.setHours(endDate.getHours() + endHours);
