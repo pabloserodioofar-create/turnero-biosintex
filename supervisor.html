@@ -121,6 +121,7 @@
     }
 
     var calendar;
+    var globalDB = {}; // Para guardar usuarios y poder buscarlos
 
     document.addEventListener('DOMContentLoaded', async function() {
         const calendarEl = document.getElementById('calendar');
@@ -175,14 +176,30 @@
             const start = event.start;
             const content = document.getElementById('modalContent');
             
+            // Buscar datos de contacto en USUARIOS
+            const supplierData = (globalDB.USUARIOS || []).find(u => String(u.proveedor_id).trim() === String(p.supplier_id).trim());
+            const email = supplierData ? supplierData.email : 'No cargado';
+            const tel = supplierData ? supplierData.telefono : 'No cargado';
+
             content.innerHTML = `
                 <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2 bg-blue-50 p-3 rounded-lg border border-blue-100 mb-2">
+                        <p class="text-xs text-blue-600 font-bold uppercase mb-1">Contacto del Proveedor</p>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-sm">mail</span>
+                            <span class="font-semibold text-sm">${email}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">call</span>
+                            <span class="font-semibold text-sm">${tel}</span>
+                        </div>
+                    </div>
                     <div><p class="text-xs text-gray-500 font-bold uppercase">Proveedor</p><p class="font-semibold">${p.supplier}</p></div>
                     <div><p class="text-xs text-gray-500 font-bold uppercase">Planta</p><p class="font-semibold">${p.planta}</p></div>
                     <div><p class="text-xs text-gray-500 font-bold uppercase">Fecha y Hora</p><p class="font-semibold">${start.toLocaleDateString()} - ${start.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} hs</p></div>
                     <div><p class="text-xs text-gray-500 font-bold uppercase">Orden de Compra</p><p class="font-bold text-[#004f89]">${p.oc}</p></div>
                     <div class="col-span-2"><p class="text-xs text-gray-500 font-bold uppercase">Material</p><p class="font-semibold">${p.articulo}</p></div>
-                    <div class="col-span-2"><p class="text-xs text-gray-500 font-bold uppercase">Pallets</p><div class="bg-blue-50 p-2 rounded border border-blue-100 font-bold text-blue-800 text-lg">${p.pallets} Pallets</div></div>
+                    <div class="col-span-2"><p class="text-xs text-gray-500 font-bold uppercase">Pallets</p><div class="bg-gray-50 p-2 rounded border font-bold text-gray-800">${p.pallets} Pallets</div></div>
                 </div>
             `;
 
@@ -223,6 +240,7 @@
                 if (!res.ok) throw new Error("Respuesta no ok: " + res.status);
                 
                 const db = await res.json();
+                globalDB = db; // Guardar para búsquedas
                 console.log("Datos recibidos. Pestañas disponibles:", Object.keys(db));
                 
                 // Buscar la pestaña TURNOS de forma muy permisiva (ignora espacios, mayúsculas)
@@ -350,6 +368,7 @@
                         borderColor: 'transparent',
                         extendedProps: {
                             supplier: s.nombre_proveedor || 'S/D',
+                            supplier_id: s.proveedor_id,
                             planta: s.planta,
                             oc: s.oc,
                             articulo: s.articulo,
