@@ -8,649 +8,367 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="config.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#004f89",
-                        "secondary": "#006e2d",
-                        "error": "#ba1a1a",
-                        "primary-container": "#0067b1",
-                        "background": "#f8f9ff",
-                        "surface": "#f8f9ff",
-                        "surface-container-low": "#eff4ff",
-                        "surface-container-lowest": "#ffffff",
-                        "on-surface": "#0b1c30",
-                        "on-surface-variant": "#414751"
-                    },
-                    fontFamily: {
-                        "headline": ["Manrope"],
-                        "body": ["Inter"],
-                        "label": ["Inter"]
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
-        body { font-family: 'Inter', sans-serif; }
-        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
-        .hidden { display: none; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff;}
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; color: #004f89; }
+        .slot-btn:hover:not(:disabled) { transform: scale(1.02); }
+        .slot-btn:disabled { opacity: 0.5; background: #e5e7eb; border-color: #d1d5db; color: #9ca3af; cursor: not-allowed; }
+        .slot-occupied { background: #fee2e2 !important; border-color: #fecaca !important; color: #b91c1c !important; cursor: not-allowed; }
     </style>
 </head>
-<body class="bg-background text-on-surface antialiased">
+<body class="bg-[#f8f9ff] text-[#0b1c30] antialiased">
 
-<header class="fixed top-0 w-full z-50 bg-[#e0f1ff] flex justify-between items-center px-6 h-16 shadow-sm">
+<header class="fixed top-0 w-full z-50 bg-white flex justify-between items-center px-6 h-16 shadow-sm border-b">
     <div class="flex items-center gap-2">
-        <span class="text-primary font-extrabold text-xl tracking-tighter">Biosintex</span>
+        <span class="text-[#004f89] font-extrabold text-xl tracking-tighter">Biosintex Proveedores</span>
     </div>
     <div class="flex items-center gap-4">
-        <span class="text-sm font-bold text-gray-500" id="header_user">Cargando...</span>
-        <a href="#" onclick="logout(); return false;" class="text-error font-medium hover:underline text-sm">Cerrar Sesión</a>
+        <span class="text-sm font-bold text-gray-500" id="user-display">Cargando...</span>
+        <button onclick="openProfile(true)" class="text-[#004f89] font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition shadow-sm flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">person_edit</span> Editar Perfil
+        </button>
+        <a href="#" onclick="logout(); return false;" class="text-red-600 font-bold hover:underline text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition">Cerrar Sesión</a>
     </div>
 </header>
 
-<main class="pt-24 pb-12 px-4 md:px-12 bg-surface min-h-screen">
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-                <h1 class="text-3xl md:text-5xl font-extrabold text-on-surface tracking-tighter mb-4">
-                    Programa tu <br/><span class="text-primary">Entrega de Insumos</span>
-                </h1>
-                <p class="text-on-surface-variant max-w-xl text-lg mt-2">
-                    Seleccioná una de tus Órdenes de Compra para agendar el turno.
-                </p>
-            </div>
-            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex flex-col gap-3 min-w-[280px] shadow-sm">
-                <p class="text-[10px] font-bold text-blue-800 uppercase tracking-widest">Mis datos de contacto</p>
-                <div class="flex gap-2">
-                    <input type="email" id="prof_email" placeholder="Email" class="text-xs p-2 border rounded w-full">
-                    <input type="tel" id="prof_tel" placeholder="Teléfono" class="text-xs p-2 border rounded w-full">
+<main class="pt-24 pb-12 px-4 md:px-12 min-h-screen">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- COLUMNA IZQUIERDA: NUEVO TURNO -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- PASO 1: SELECCIONAR OC -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><span class="bg-[#004f89] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> Seleccionar Orden de Compra Pendiente</h2>
+                    <div id="oc-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto pr-2">
+                        <p class="text-gray-500 italic py-4">Obteniendo tus pedidos...</p>
+                    </div>
                 </div>
-                <button onclick="saveProfile()" id="btn_save_prof" class="text-[10px] bg-primary text-white font-bold py-2 rounded hover:bg-blue-800 transition">ACTUALIZAR DATOS</button>
-            </div>
-        </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <!-- Left Column: Selection Flow -->
-            <div class="lg:col-span-7 space-y-8">
-                
-                <!-- Step 1: OC Selection Dropdown -->
-                <section class="bg-surface-container-low p-8 rounded-xl border border-blue-100">
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                        <h2 class="text-xl font-bold text-on-surface">Seleccionar Orden de Compra</h2>
-                    </div>
-                    <div class="space-y-4">
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Órdenes de Compra Disponibles</label>
-                        <select id="oc_select" class="w-full p-3 rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
-                            <option value="">Cargando órdenes...</option>
-                        </select>
-                        <button id="btn_verify_oc" class="w-full bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-800 transition">Validar Selección</button>
-                    </div>
-                    <div id="error_oc" class="text-error text-sm mt-3 hidden font-bold"></div>
-                </section>
-
-                <!-- Step 1.5: OC Subdivision Selection (hidden by default) -->
-                <section id="step_oc_select" class="hidden bg-surface-container-low p-8 rounded-xl border border-amber-200">
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="bg-amber-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">!</span>
-                        <h2 class="text-xl font-bold text-on-surface">Seleccionar Subdivisión de OC</h2>
-                    </div>
-                    <p class="text-sm text-gray-600 mb-4">Se encontraron múltiples renglones para esta OC. Seleccioná el que corresponda:</p>
-                    <div id="oc_options_list" class="space-y-3"></div>
-                </section>
-
-                <!-- Hidden until valid OC -->
-                <div id="step_schedule" class="hidden space-y-8">
-                    <!-- Step 2: Date & Slots -->
-                    <section class="bg-surface-container-low p-8 rounded-xl border border-blue-100">
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                            <h2 class="text-xl font-bold">Fecha, Pallets y Turnos</h2>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label class="block text-xs font-semibold text-on-surface-variant uppercase mb-2">Cantidad de Pallets a entregar</label>
-                            <input type="number" id="pallets_input" min="1" value="1" class="w-full p-3 rounded-lg border-gray-300 shadow-sm focus:border-primary w-1/3">
-                            <p class="text-xs text-gray-500 mt-2">Cada turno de 1 hora permite hasta 5 pallets. La recepción cierra a las 13:00 hs.</p>
-                        </div>
-
-                        <div class="mb-6">
-                            <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Seleccionar Fecha (Lunes a Viernes)</label>
-                            <input type="date" id="date_input" class="w-full p-3 rounded-lg border-gray-300 shadow-sm focus:border-primary">
-                            <p id="date_restriction_msg" class="text-xs text-amber-600 mt-2 hidden font-semibold"></p>
-                        </div>
-                        
+                <!-- PASO 2: SELECCIONAR FECHA Y TURNO -->
+                <div id="step-schedule" class="hidden bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><span class="bg-[#004f89] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> Seleccionar Fecha y Horario</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                         <div>
-                            <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-4">Turnos Disponibles (07:00 a 13:00 hs)</label>
-                            <div id="slots_grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                                <p class="col-span-4 text-sm text-gray-500">Seleccioná una fecha para ver disponibilidad</p>
-                            </div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Cantidad de Pallets a entregar</label>
+                            <input type="number" id="pallets_input" min="1" value="1" class="w-full p-3 rounded-xl border-gray-300 shadow-sm focus:border-[#004f89] transition">
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium italic">Máximo 5 pallets por hora. Recepción cierra 13:00 hs.</p>
                         </div>
-                    </section>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Elegir Fecha (Lunes a Viernes)</label>
+                            <input type="date" id="date_input" class="w-full p-3 rounded-xl border-gray-300 shadow-sm focus:border-[#004f89] transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-4">Turnos Disponibles según cantidad de pallets</label>
+                        <div id="slots-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                            <!-- Los botones se cargan dinámicamente -->
+                        </div>
+                    </div>
                 </div>
-
             </div>
 
-            <!-- Right Column: Summary -->
-            <div class="lg:col-span-5 sticky top-24">
-                <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden hidden" id="summary_card">
-                    <div class="bg-primary px-8 py-6">
-                        <h2 class="text-xl font-bold text-white">Resumen de Entrega</h2>
-                        <p class="text-blue-200 text-sm mt-1" id="sum_oc"></p>
+            <!-- COLUMNA DERECHA: RESUMEN Y TURNOS TOMADOS -->
+            <div class="space-y-6">
+                <div id="summary-card" class="hidden bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden sticky top-24">
+                    <div class="bg-[#004f89] p-4 text-white font-bold flex items-center gap-2"><span class="material-symbols-outlined">assignment</span> Resumen del Turno</div>
+                    <div class="p-6 space-y-4">
+                        <div><p class="text-xs text-gray-400 font-bold uppercase">Planta de Entrega</p><p id="sum-planta" class="font-bold text-gray-800"></p></div>
+                        <div><p class="text-xs text-gray-400 font-bold uppercase">Material</p><p id="sum-articulo" class="text-sm font-medium leading-tight"></p></div>
+                        <div><p class="text-xs text-gray-400 font-bold uppercase">Fecha y Turno Elegido</p><p id="sum-time" class="font-extrabold text-[#004f89] text-lg">-</p></div>
+                        <button id="confirm-btn" disabled class="w-full py-4 bg-[#004f89] text-white font-extrabold rounded-xl shadow-lg transition disabled:bg-gray-200 disabled:shadow-none hover:bg-blue-900">Confirmar Reserva</button>
                     </div>
-                    <div class="p-8 space-y-6 bg-gray-50">
-                        <div class="flex items-start gap-4">
-                            <div class="bg-blue-100 p-2 rounded">
-                                <span class="material-symbols-outlined text-primary">location_on</span>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 font-bold uppercase tracking-tight">Planta</p>
-                                <p class="text-lg font-bold text-gray-900" id="sum_planta">-</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-start gap-4">
-                            <div class="bg-blue-100 p-2 rounded">
-                                <span class="material-symbols-outlined text-primary">inventory_2</span>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 font-bold uppercase tracking-tight">Material</p>
-                                <p class="text-sm font-medium text-gray-900" id="sum_art">-</p>
-                                <p class="text-xs text-gray-500" id="sum_qty"></p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start gap-4">
-                            <div class="bg-blue-100 p-2 rounded">
-                                <span class="material-symbols-outlined text-primary">event</span>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 font-bold uppercase tracking-tight">Fecha y Turno Asignado</p>
-                                <p class="text-lg font-bold text-gray-900" id="sum_date">-</p>
-                                <p class="text-base font-medium text-secondary" id="sum_time">Selecciona un turno</p>
-                            </div>
-                        </div>
-
-                        <button id="btn_confirm" class="w-full py-4 bg-primary text-white rounded-lg font-bold text-lg hover:bg-blue-800 transition-all shadow-md active:scale-95 duration-150 disabled:opacity-50" disabled>
-                            Confirmar Turno
-                        </button>
-                    </div>
-                </section>
+                </div>
             </div>
-
         </div>
 
-        <!-- Nueva Sección: Historial de Turnos -->
-        <section class="mt-12 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="bg-gray-800 text-white px-6 py-4 flex justify-between items-center">
-                <h2 class="text-xl font-bold flex items-center gap-2">
-                    <span class="material-symbols-outlined">history</span>
-                    Mis Próximas Entregas
+        <!-- TABLA DE HISTORIAL -->
+        <div class="mt-12 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b bg-gray-50 flex justify-between items-center">
+                <h2 class="text-xl font-bold flex items-center gap-2 text-gray-700">
+                    <span class="material-symbols-outlined text-gray-500">history</span> Mis Próximas Entregas
                 </h2>
-                <span class="text-xs bg-gray-700 px-3 py-1 rounded-full text-gray-300">Solo turnos futuros</span>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Solo turnos futuros</span>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-500 text-[10px] font-bold uppercase tracking-widest border-b">
+                    <thead class="bg-gray-50 border-b text-[10px] font-bold text-gray-400 uppercase">
+                        <tr>
                             <th class="px-6 py-4">Fecha</th>
                             <th class="px-6 py-4">Hora</th>
                             <th class="px-6 py-4">Planta</th>
                             <th class="px-6 py-4">OC</th>
-                            <th class="px-6 py-4">Pallets</th>
-                            <th class="px-6 py-4">Estado</th>
+                            <th class="px-6 py-4 text-center">Pallets</th>
+                            <th class="px-6 py-4 text-center">Estado</th>
                         </tr>
                     </thead>
-                    <tbody id="history_body" class="divide-y divide-gray-100 italic text-gray-400">
-                        <tr><td colspan="6" class="px-6 py-8 text-center text-sm">Cargando historial...</td></tr>
+                    <tbody id="history-body" class="divide-y divide-gray-100 text-sm">
+                        <!-- Cargado por JS -->
                     </tbody>
                 </table>
             </div>
-        </section>
+        </div>
     </div>
 </main>
 
+<!-- MODAL PERFIL (OBLIGATORIO SI ESTÁ VACÍO) -->
+<div id="profile-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div class="bg-[#004f89] p-8 text-white relative">
+            <h3 class="text-2xl font-bold">Datos de Contacto</h3>
+            <p class="text-blue-100 text-sm mt-1">Necesarios para coordinar tu entrega.</p>
+            <button id="close-profile" class="hidden absolute top-4 right-4 hover:bg-white/20 rounded-full p-2"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="p-8 space-y-6">
+            <div id="mandatory-warning" class="hidden bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-800 text-sm font-medium flex gap-3">
+                <span class="material-symbols-outlined text-amber-600">warning</span>
+                Por favor, completá tus datos de contacto para poder reservar turnos.
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Correo Electrónico</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-3 text-gray-400 material-symbols-outlined">mail</span>
+                    <input type="email" id="profile-email" class="w-full pl-10 p-3 bg-gray-50 border-gray-200 rounded-xl focus:ring-[#004f89] focus:border-[#004f89]" placeholder="ejemplo@proveedor.com">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Teléfono / WhatsApp</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-3 text-gray-400 material-symbols-outlined">call</span>
+                    <input type="tel" id="profile-tel" class="w-full pl-10 p-3 bg-gray-50 border-gray-200 rounded-xl focus:ring-[#004f89] focus:border-[#004f89]" placeholder="+54 11 ...">
+                </div>
+            </div>
+            <button id="save-profile" class="w-full py-4 bg-[#004f89] text-white font-extrabold rounded-2xl shadow-xl hover:bg-blue-900 transition-all">Guardar Datos</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // SESIÓN
     const sessionStr = localStorage.getItem('biosintex_session');
     if (!sessionStr) window.location.href = 'login.html';
     const currentUser = JSON.parse(sessionStr);
-    document.getElementById('header_user').innerText = "Proveedor: " + (currentUser.proveedor_id || currentUser.username);
 
-    function logout() {
-        localStorage.removeItem('biosintex_session');
-        window.location.href = 'login.html';
-    }
+    function logout() { localStorage.removeItem('biosintex_session'); window.location.href = 'login.html'; }
 
-    // DATOS GLOBALES
-    let db = null;
-    let currentOC = null;
-    let selectedSlot = null;
-    let blockedDates = [];
-    const dateInput = document.getElementById('date_input');
-    
-    // Configurar fecha mínima (Hoy + 2 días hábiles)
-    function getMinDate() {
-        let d = new Date();
-        let added = 0;
-        while(added < 2) {
-            d.setDate(d.getDate() + 1);
-            let day = d.getDay();
-            if (day !== 0 && day !== 6 && !CONFIG.FERIADOS_2026.includes(d.toISOString().split('T')[0])) {
-                added++;
-            }
+    var db = {};
+    var currentOC = null;
+    var selectedSlot = null;
+    var blockedDates = [];
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        document.getElementById('user-display').innerText = currentUser.nombre;
+        
+        // VERIFICAR PERFIL OBLIGATORIO
+        if (!currentUser.email || !currentUser.telefono || currentUser.email === "" || currentUser.telefono === "") {
+            openProfile(false); // Abrir pero no permitir cerrar
         }
-        return d.toISOString().split('T')[0];
-    }
-    const defaultMinDate = getMinDate();
-    dateInput.min = defaultMinDate;
 
-    function getColumns(rows) {
-        if (!rows || rows.length === 0) return {};
-        const first = rows[0];
-        const keys = Object.keys(first);
-        
-        // Detección agresiva de OC (Columna O típica)
-        let ocKey = keys.find(k => {
-            const low = k.toLowerCase().trim();
-            return low === 'orden de compra' || low === 'oc' || low === 'nro. oc' || low === 'compra' || low === 'nro de oc';
-        });
-        
-        // Fallback por posición si los nombres son raros (Columna O es la 15, índice 14)
-        if (!ocKey && keys.length >= 15) ocKey = keys[14];
+        await loadData();
 
-        return {
-            oc: ocKey,
-            prov: keys.find(k => k.toLowerCase().includes('proveedor') && !k.toLowerCase().includes('nombre')),
-            art: keys.find(k => k.toLowerCase().includes('art') && k.toLowerCase().includes('culo')),
-            nom: keys.find(k => k.includes('Nombre_1')) || keys.find(k => k.toLowerCase().includes('material')) || keys.find(k => k.toLowerCase().includes('art')),
-            planta: keys.find(k => k.toLowerCase().includes('lugar') || k.toLowerCase().includes('planta')),
-            qty: keys.find(k => k.toLowerCase().includes('pendiente')),
-            fechaNeed: keys.find(k => k.toLowerCase().includes('fecha entrega'))
+        window.openProfile = (allowClose) => {
+            document.getElementById('profile-email').value = currentUser.email || '';
+            document.getElementById('profile-tel').value = currentUser.telefono || '';
+            document.getElementById('profile-modal').classList.remove('hidden');
+            if (allowClose) {
+                document.getElementById('close-profile').classList.remove('hidden');
+                document.getElementById('mandatory-warning').classList.add('hidden');
+            } else {
+                document.getElementById('close-profile').classList.add('hidden');
+                document.getElementById('mandatory-warning').classList.remove('hidden');
+            }
         };
-    }
 
-    // CARGA DE DATOS DESDE GOOGLE
-    async function loadData() {
-        // Cargar datos de perfil guardados
-        document.getElementById('prof_email').value = currentUser.email || "";
-        document.getElementById('prof_tel').value = currentUser.telefono || "";
+        document.getElementById('close-profile').onclick = () => document.getElementById('profile-modal').classList.add('hidden');
 
-        try {
+        document.getElementById('save-profile').onclick = async () => {
+            const email = document.getElementById('profile-email').value.trim();
+            const tel = document.getElementById('profile-tel').value.trim();
+            if (!email || !tel) return alert("Ambos campos son obligatorios.");
+
+            const btn = document.getElementById('save-profile');
+            btn.innerText = "Guardando..."; btn.disabled = true;
+
+            try {
+                const res = await fetch(CONFIG.API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'update_profile', username: currentUser.username, email: email, telefono: tel })
+                });
+                const r = await res.json();
+                if (r.success) {
+                    currentUser.email = email;
+                    currentUser.telefono = tel;
+                    localStorage.setItem('biosintex_session', JSON.stringify(currentUser));
+                    alert("¡Datos guardados! Ya podés operar.");
+                    document.getElementById('profile-modal').classList.add('hidden');
+                }
+            } catch(e) { alert("Error: " + e.message); }
+            finally { btn.innerText = "Guardar Datos"; btn.disabled = false; }
+        };
+
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('date_input').min = tomorrow.toISOString().split('T')[0];
+
+        async function loadData() {
             const res = await fetch(CONFIG.API_URL + "?action=get_all");
             db = await res.json();
-            console.log("DB Cargada:", db);
-
-            const bKey = Object.keys(db).find(k => k.toLowerCase() === 'bloqueos');
-            if (bKey) {
-                // Normalizar fechas de bloqueo a YYYY-MM-DD
-                blockedDates = db[bKey].map(b => {
-                    let d = new Date(b.fecha);
-                    return isNaN(d.getTime()) ? String(b.fecha).split('T')[0] : d.toISOString().split('T')[0];
-                });
-                console.log("Días bloqueados:", blockedDates);
-            }
-
+            renderOCs();
             renderHistory();
-            populateOCDropdown();
-        } catch (e) {
-            console.error(e);
-            alert("Error cargando base de datos. Pudo haber un problema de conexión con Google Sheets.");
-        }
-    }
-    loadData();
-
-    function renderHistory() {
-        const historyBody = document.getElementById('history_body');
-        const myShifts = (db.TURNOS || []).filter(s => 
-            String(s.proveedor_id).trim() === String(currentUser.proveedor_id).trim() && 
-            String(s.estado).trim() !== 'Cancelado'
-        ).sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
-
-        const today = new Date().toISOString().split('T')[0];
-        const upcoming = myShifts.filter(s => {
-            let sDate = new Date(s.fecha);
-            let sDateStr = isNaN(sDate) ? String(s.fecha).split('T')[0] : sDate.toISOString().split('T')[0];
-            return sDateStr >= today;
-        });
-
-        if (upcoming.length === 0) {
-            historyBody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">No tienes turnos programados próximamente.</td></tr>';
-            return;
+            blockedDates = (db.BLOQUEOS || []).map(b => b.fecha);
         }
 
-        historyBody.innerHTML = upcoming.map(s => `
-            <tr class="hover:bg-blue-50/50 transition text-sm text-gray-700 not-italic font-medium">
-                <td class="px-6 py-4 font-bold text-[#004f89]">${s.fecha}</td>
-                <td class="px-6 py-4">${s.hora} hs</td>
-                <td class="px-6 py-4">${s.planta}</td>
-                <td class="px-6 py-4 text-xs font-mono">${s.oc}</td>
-                <td class="px-6 py-4 font-bold text-gray-900">${s.pallets}</td>
-                <td class="px-6 py-4">
-                    <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold uppercase">Confirmado</span>
-                </td>
-            </tr>
-        `).join('');
-    }
+        function renderOCs() {
+            const container = document.getElementById('oc-container');
+            const ocKey = Object.keys(db).find(k => k.toLowerCase() === 'maestro_oc');
+            const userOrders = (db[ocKey] || []).filter(o => String(o.Proveedor).split('.')[0].trim() === String(currentUser.proveedor_id).trim());
 
-    async function saveProfile() {
-        const btn = document.getElementById('btn_save_prof');
-        const email = document.getElementById('prof_email').value;
-        const tel = document.getElementById('prof_tel').value;
-
-        btn.disabled = true;
-        btn.innerText = "GUARDANDO...";
-
-        try {
-            const res = await fetch(CONFIG.API_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'update_profile',
-                    username: currentUser.username,
-                    email: email,
-                    telefono: tel
-                })
-            });
-            const r = await res.json();
-            if (r.success) {
-                currentUser.email = email;
-                currentUser.telefono = tel;
-                localStorage.setItem('biosintex_session', JSON.stringify(currentUser));
-                alert("Datos actualizados correctamente.");
+            if (userOrders.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-center py-10 bg-gray-50 rounded-xl border border-dashed text-gray-400">No tenés órdenes de compra pendientes.</div>`;
+                return;
             }
-        } catch (e) {
-            alert("Error al guardar perfil");
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "ACTUALIZAR DATOS";
-        }
-    }
 
-    function populateOCDropdown() {
-        const maestro = db.MAESTRO_OC || [];
-        const cols = getColumns(maestro);
-        const select = document.getElementById('oc_select');
-        select.innerHTML = '<option value="">-- Seleccioná una OC --</option>';
-
-        if (!cols.oc || !cols.prov) {
-            console.error("Columnas no detectadas:", cols);
-            select.innerHTML = '<option value="">Error: No se detectaron las columnas en el Excel</option>';
-            return;
-        }
-
-        const myProv = String(currentUser.proveedor_id).trim();
-        
-        // Filtrar únicas y por proveedor
-        const seen = new Set();
-        const myOCs = maestro.filter(row => {
-            const rowProv = String(row[cols.prov] || "").trim();
-            const rowOC = String(row[cols.oc] || "").trim();
-            
-            if (rowOC === "" || rowOC.toLowerCase() === "null") return false;
-
-            if ((rowProv === myProv || myProv === "1000") && !seen.has(rowOC)) {
-                seen.add(rowOC);
-                return true;
-            }
-            return false;
-        });
-
-        if (myOCs.length === 0) {
-            select.innerHTML = '<option value="">No tenés OCs pendientes</option>';
-        } else {
-            myOCs.forEach(opt => {
-                const el = document.createElement('option');
-                el.value = opt[cols.oc];
-                // Mostramos el número de OC primero
-                el.innerText = `${opt[cols.oc]} - ${opt[cols.nom] || 'Sin descripción'}`;
-                select.appendChild(el);
-            });
-        }
-    }
-
-    // ==============================
-    // STEP 1: Verificar OC seleccionada
-    // ==============================
-    document.getElementById('btn_verify_oc').addEventListener('click', function() {
-        const ocValue = document.getElementById('oc_select').value;
-        const errorDiv = document.getElementById('error_oc');
-        if (!ocValue || !db) return;
-
-        // Reset
-        document.getElementById('step_oc_select').classList.add('hidden');
-        document.getElementById('step_schedule').classList.add('hidden');
-        document.getElementById('summary_card').classList.add('hidden');
-        currentOC = null;
-
-        const maestro = db.MAESTRO_OC || [];
-        const cols = getColumns(maestro);
-
-        // Buscar todos los renglones que coincidan con esa OC
-        const matches = maestro.filter(row => String(row[cols.oc] || "").trim() === String(ocValue).trim());
-
-        if (matches.length === 0) {
-            errorDiv.innerText = "Error validando la orden seleccionada.";
-            errorDiv.classList.remove('hidden');
-        } else if (matches.length > 1) {
-            showOcOptions(matches, cols);
-            errorDiv.classList.add('hidden');
-        } else {
-            selectOC(matches[0], cols);
-            errorDiv.classList.add('hidden');
-        }
-    });
-
-    function showOcOptions(options, cols) {
-        const container = document.getElementById('oc_options_list');
-        container.innerHTML = '';
-        options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = "w-full text-left p-4 bg-white border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-all shadow-sm";
-            btn.innerHTML = `
-                <div class="flex justify-between items-center text-sm">
-                    <div>
-                        <p class="font-bold">OC: ${opt[cols.oc]}</p>
-                        <p class="text-gray-600">${opt[cols.nom] || 'Sin nombre'}</p>
-                        <p class="text-xs text-gray-400 font-bold">Planta: ${opt[cols.planta]} | Pendiente: ${opt[cols.qty]}</p>
+            container.innerHTML = userOrders.map(o => `
+                <div onclick="selectOC(this, '${o.OC}')" class="oc-card p-5 border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-blue-200 hover:bg-blue-50/30 transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-black text-[#004f89] bg-blue-50 px-2 py-1 rounded">OC: ${o.OC}</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${o.Planta}</span>
                     </div>
-                    <span class="material-symbols-outlined text-primary">chevron_right</span>
-                </div>`;
-            btn.onclick = () => selectOC(opt, cols);
-            container.appendChild(btn);
-        });
-        document.getElementById('step_oc_select').classList.remove('hidden');
-    }
+                    <p class="text-sm font-bold text-gray-700 leading-tight mb-2 group-hover:text-[#004f89]">${o.Artículo}</p>
+                    <div class="flex items-center gap-1 text-[#059669]"><span class="material-symbols-outlined text-sm">inventory_2</span> <span class="text-xs font-black">PENDIENTE: ${o.Pendiente}</span></div>
+                </div>
+            `).join('');
+        }
 
-    function selectOC(data, cols) {
-        // Normalizar planta
-        let p = String(data[cols.planta] || "").toUpperCase();
-        let normalizedPlanta = p.includes('PIBERA') || p.includes('LELOIR') ? 'Pibera' : 'Barracas';
-
-        currentOC = {
-            oc: data[cols.oc],
-            articulo: data[cols.nom],
-            planta: normalizedPlanta,
-            pendiente: data[cols.qty],
-            fecha_necesidad: data[cols.fechaNeed]
+        window.selectOC = (el, ocNumber) => {
+            const ocKey = Object.keys(db).find(k => k.toLowerCase() === 'maestro_oc');
+            currentOC = db[ocKey].find(o => o.OC === ocNumber);
+            document.querySelectorAll('.oc-card').forEach(c => c.classList.remove('border-[#004f89]', 'bg-blue-50'));
+            el.classList.add('border-[#004f89]', 'bg-blue-50');
+            document.getElementById('step-schedule').classList.remove('hidden');
+            document.getElementById('summary-card').classList.remove('hidden');
+            document.getElementById('sum-planta').innerText = currentOC.Planta;
+            document.getElementById('sum-articulo').innerText = currentOC.Artículo;
+            resetSelection();
         };
 
-        // Mostrar UI
-        document.getElementById('step_oc_select').classList.add('hidden');
-        document.getElementById('step_schedule').classList.remove('hidden');
-        document.getElementById('summary_card').classList.remove('hidden');
-
-        // Resumen
-        document.getElementById('sum_oc').innerText = 'OC: ' + currentOC.oc;
-        document.getElementById('sum_planta').innerText = currentOC.planta;
-        document.getElementById('sum_art').innerText = currentOC.articulo;
-        document.getElementById('sum_qty').innerText = 'Pendiente: ' + currentOC.pendiente;
-
-        // Restricción de fecha (Columna Q del original)
-        const restrictionMsg = document.getElementById('date_restriction_msg');
-        if (currentOC.fecha_necesidad) {
-            const dateObj = new Date(currentOC.fecha_necesidad);
-            if (!isNaN(dateObj.getTime())) {
-                const firstOfMonth = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1).toISOString().split('T')[0];
-                if (firstOfMonth > defaultMinDate) {
-                    dateInput.min = firstOfMonth;
-                    restrictionMsg.innerText = "La necesidad de presupuesto es para el mes de " + dateObj.toLocaleString('es-ES', {month: 'long', year: 'numeric'});
-                    restrictionMsg.classList.remove('hidden');
-                } else {
-                    dateInput.min = defaultMinDate;
-                    restrictionMsg.classList.add('hidden');
-                }
-            }
+        function resetSelection() {
+            selectedSlot = null;
+            document.getElementById('sum-time').innerText = "-";
+            document.getElementById('confirm-btn').disabled = true;
+            renderSlots();
         }
-        
-        // Reset campos
-        dateInput.value = '';
-        renderSlots([]);
-        updateConfirmBtn();
-    }
 
-    // ==============================
-    // STEP 2: Slots & Disponibilidad
-    // ==============================
-    dateInput.onchange = checkAvailability;
-    document.getElementById('pallets_input').oninput = checkAvailability;
+        document.getElementById('date_input').onchange = renderSlots;
+        document.getElementById('pallets_input').oninput = renderSlots;
 
-    function checkAvailability() {
-        const date = dateInput.value;
-        const pallets = parseInt(document.getElementById('pallets_input').value) || 1;
-        if (!date || !currentOC) return;
-
-        // Normalizar fecha seleccionada para comparar
-        const selectedDateStr = new Date(date + "T12:00:00").toISOString().split('T')[0];
-
-        // Validaciones Básicas
-        const d = new Date(date + "T12:00:00");
-        if (d.getDay() === 0 || d.getDay() === 6) { alert("Los turnos son solo de Lunes a Viernes."); dateInput.value = ""; return; }
-        if (CONFIG.FERIADOS_2026.includes(selectedDateStr)) { alert("El día seleccionado es feriado."); dateInput.value = ""; return; }
-        
-        // Comprobar bloqueos manuales
-        const isBlocked = blockedDates.some(bd => {
-            const bDate = new Date(bd);
-            return !isNaN(bDate) && bDate.toISOString().split('T')[0] === selectedDateStr;
-        });
-        if (isBlocked) { alert("Este día ha sido bloqueado por el supervisor."); dateInput.value = ""; return; }
-
-        const requiredBlocks = Math.ceil(pallets / 5);
-        const allSlots = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00"];
-        
-        // Calcular TODAS las horas ya ocupadas en esa planta/fecha
-        const bookedTimes = new Set();
-        (db.TURNOS || []).forEach(s => {
-            let sDate = new Date(s.fecha);
-            let sDateStr = !isNaN(sDate) ? sDate.toISOString().split('T')[0] : String(s.fecha).trim();
+        function renderSlots() {
+            const container = document.getElementById('slots-container');
+            const date = document.getElementById('date_input').value;
+            const pallets = parseInt(document.getElementById('pallets_input').value) || 1;
             
-            if (sDateStr === selectedDateStr && s.planta === currentOC.planta && String(s.estado).toLowerCase().trim() === 'confirmado') {
-                const startIdx = allSlots.indexOf(s.hora);
-                if (startIdx !== -1) {
-                    const blocks = Math.ceil((parseInt(s.pallets) || 1) / 5);
-                    for (let i = 0; i < blocks; i++) {
-                        if (startIdx + i < allSlots.length) {
-                            bookedTimes.add(allSlots[startIdx + i]);
-                        }
+            if (!date) { container.innerHTML = '<p class="col-span-full text-center text-xs text-gray-400 py-4">Seleccioná una fecha para ver horarios.</p>'; return; }
+
+            // Función interna para normalizar fechas de cualquier formato a YYYY-MM-DD
+            const normalizeDate = (f) => {
+                let raw = String(f).trim().split('T')[0].split(' ')[0];
+                let parts = raw.split(/[\/-]/);
+                if (parts.length !== 3) return raw;
+                let [a, b, c] = parts;
+                return a.length === 4 ? `${a}-${b.padStart(2,'0')}-${c.padStart(2,'0')}` : `${c}-${b.padStart(2,'0')}-${a.padStart(2,'0')}`;
+            };
+
+            const selectedDateStr = date;
+            
+            const isBlocked = blockedDates.some(b => normalizeDate(b) === selectedDateStr);
+            if (isBlocked) { container.innerHTML = '<div class="col-span-full bg-red-50 text-red-600 p-4 rounded-xl text-center text-xs font-bold border border-red-100 italic">Día bloqueado por el supervisor por tareas de distribución interna.</div>'; return; }
+
+            const requiredBlocks = Math.ceil(pallets / 5);
+            const allSlots = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00"];
+            
+            const bookedTimes = new Set();
+            (db.TURNOS || []).forEach(s => {
+                const sDateStr = normalizeDate(s.fecha);
+                if (sDateStr === selectedDateStr && s.planta === currentOC.Planta && String(s.estado).toLowerCase().trim() === 'confirmado') {
+                    const startIdx = allSlots.indexOf(s.hora);
+                    if (startIdx !== -1) {
+                        const blocks = Math.ceil((parseInt(s.pallets) || 1) / 5);
+                        for (let i = 0; i < blocks; i++) { if (startIdx + i < allSlots.length) bookedTimes.add(allSlots[startIdx + i]); }
                     }
                 }
-            }
-        });
+            });
 
-        const available = [];
-        for (let i = 0; i < allSlots.length; i++) {
-            // Un turno no puede empezar si necesita más bloques de los que quedan
-            if (i + requiredBlocks > allSlots.length) continue; 
-            
-            let canFit = true;
-            for (let j = 0; j < requiredBlocks; j++) {
-                if (bookedTimes.has(allSlots[i+j])) {
-                    canFit = false; break;
+            container.innerHTML = allSlots.map((time, i) => {
+                let isOccupied = false;
+                for (let j = 0; j < requiredBlocks; j++) {
+                    if (i + j >= allSlots.length || bookedTimes.has(allSlots[i+j])) { isOccupied = true; break; }
                 }
-            }
-            if (canFit) available.push(allSlots[i]);
+
+                if (isOccupied) return `<button disabled class="p-3 text-xs font-bold rounded-xl border border-gray-100 bg-gray-50 text-gray-300">Ocupado</button>`;
+                return `<button onclick="setSlot('${time}')" class="slot-btn p-3 text-xs font-bold rounded-xl border ${selectedSlot === time ? 'bg-[#004f89] text-white border-[#004f89]' : 'bg-white text-gray-700 border-gray-200 hover:border-[#004f89]'} transition-all">${time}</button>`;
+            }).join('');
         }
 
-        renderSlots(available, requiredBlocks);
-    }
-
-    function renderSlots(slots, required) {
-        const grid = document.getElementById('slots_grid');
-        grid.innerHTML = '';
-        selectedSlot = null;
-        
-        if (slots.length === 0 && dateInput.value) {
-            grid.innerHTML = '<p class="col-span-4 text-sm text-error font-bold text-center p-4 bg-red-50 rounded">No hay disponibilidad para esta fecha y cantidad de pallets.</p>';
-            return;
-        }
-
-        slots.forEach(time => {
-            const btn = document.createElement('button');
-            btn.className = "py-3 rounded bg-green-100 text-green-800 font-bold border border-green-200 hover:bg-green-200 transition-all";
-            btn.innerText = time;
-            btn.onclick = () => {
-                Array.from(grid.children).forEach(c => c.className = "py-3 rounded bg-green-100 text-green-800 font-bold border border-green-200");
-                btn.className = "py-3 rounded bg-primary text-white font-bold ring-2 ring-offset-2 ring-primary";
-                selectedSlot = time;
-                document.getElementById('sum_date').innerText = dateInput.value;
-                document.getElementById('sum_time').innerText = time + (required > 1 ? ` (Bloque de ${required}h)` : "");
-                updateConfirmBtn();
-            };
-            grid.appendChild(btn);
-        });
-        updateConfirmBtn();
-    }
-
-    function updateConfirmBtn() {
-        document.getElementById('btn_confirm').disabled = !(selectedSlot && currentOC);
-    }
-
-    // ==============================
-    // STEP 3: Confirmar en Google
-    // ==============================
-    document.getElementById('btn_confirm').onclick = async () => {
-        const btn = document.getElementById('btn_confirm');
-        btn.disabled = true;
-        btn.innerText = "Procesando...";
-
-        const payload = {
-            action: "book_shift",
-            proveedor_id: currentUser.proveedor_id,
-            nombre_proveedor: currentUser.nombre || currentUser.username,
-            fecha: dateInput.value,
-            hora: selectedSlot,
-            planta: currentOC.planta,
-            oc: currentOC.oc,
-            articulo: currentOC.articulo,
-            pallets: parseInt(document.getElementById('pallets_input').value)
+        window.setSlot = (time) => {
+            selectedSlot = time;
+            const date = document.getElementById('date_input').value;
+            const parts = date.split('-');
+            document.getElementById('sum-time').innerText = `${parts[2]}/${parts[1]} a las ${time} hs`;
+            document.getElementById('confirm-btn').disabled = false;
+            document.getElementById('confirm-btn').classList.add('animate-bounce');
+            setTimeout(() => document.getElementById('confirm-btn').classList.remove('animate-bounce'), 1000);
+            renderSlots();
         };
 
-        try {
-            const res = await fetch(CONFIG.API_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert("¡Turno reservado exitosamente!");
-                window.location.reload();
-            } else {
-                alert("Error al reservar: " + data.error);
-                btn.disabled = false;
-                btn.innerText = "Confirmar Turno";
-            }
-        } catch (e) {
-            console.error(e);
-            alert("Error de conexión con Google Sheets. Verificá que el script esté bien desplegado.");
-            btn.disabled = false;
-            btn.innerText = "Confirmar Turno";
-        }
-    };
+        document.getElementById('confirm-btn').onclick = async () => {
+            const btn = document.getElementById('confirm-btn');
+            const data = {
+                action: 'book_shift',
+                proveedor_id: currentUser.proveedor_id,
+                nombre_proveedor: currentUser.nombre,
+                fecha: document.getElementById('date_input').value,
+                hora: selectedSlot,
+                planta: currentOC.Planta,
+                oc: currentOC.OC,
+                articulo: currentOC.Artículo,
+                pallets: document.getElementById('pallets_input').value
+            };
 
+            btn.disabled = true; btn.innerText = "Procesando...";
+
+            try {
+                const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
+                const r = await res.json();
+                if (r.success) {
+                    alert("¡Turno confirmado exitosamente!");
+                    location.reload();
+                }
+            } catch(e) { alert("Error: " + e.message); btn.disabled = false; btn.innerText = "Confirmar Reserva"; }
+        };
+
+        function renderHistory() {
+            const body = document.getElementById('history-body');
+            const history = (db.TURNOS || []).filter(s => String(s.proveedor_id).trim() === String(currentUser.proveedor_id).trim());
+            
+            if (history.length === 0) { body.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-400 italic font-medium">No tenés entregas confirmadas.</td></tr>'; return; }
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            const futureHistory = history.filter(s => s.fecha >= todayStr && String(s.estado).toLowerCase().trim() === 'confirmado');
+
+            body.innerHTML = futureHistory.sort((a,b) => a.fecha.localeCompare(b.fecha)).map(s => `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 font-bold text-gray-700">${s.fecha.split('-').reverse().join('/')}</td>
+                    <td class="px-6 py-4 font-black text-[#004f89]">${s.hora} hs</td>
+                    <td class="px-6 py-4 text-xs font-semibold text-gray-500">${s.planta}</td>
+                    <td class="px-6 py-4 font-medium">${s.oc}</td>
+                    <td class="px-6 py-4 text-center font-bold text-gray-700">${s.pallets || 1}</td>
+                    <td class="px-6 py-4 text-center"><span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-black rounded-full uppercase tracking-tighter">Confirmado</span></td>
+                </tr>
+            `).join('');
+        }
+    });
 </script>
 </body>
 </html>
