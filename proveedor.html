@@ -37,7 +37,10 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- SELECCIÓN DE OC -->
                 <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><span class="bg-[#004f89] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> Órdenes de Compra Pendientes</h2>
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <span class="bg-[#004f89] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> 
+                        Órdenes de Compra Pendientes
+                    </h2>
                     <div id="oc-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto pr-2">
                         <p class="text-gray-500 italic py-4 text-sm font-medium text-center">Buscando tus pedidos...</p>
                     </div>
@@ -45,7 +48,19 @@
 
                 <!-- SELECCIÓN DE TURNO -->
                 <div id="step-schedule" class="hidden bg-white p-8 rounded-2xl shadow-lg border border-gray-100 animate-in fade-in duration-300">
-                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><span class="bg-[#004f89] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> Selección de Fecha y Horario</h2>
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="bg-[#004f89] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> 
+                        Selección de Fecha y Horario
+                    </h2>
+                    
+                    <div id="warning-month" class="mb-6 bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-start gap-3">
+                        <span class="material-symbols-outlined text-blue-600">info</span>
+                        <div>
+                            <p class="text-xs font-bold text-blue-900">Restricción de Entrega</p>
+                            <p id="month-info-text" class="text-[11px] text-blue-700 leading-tight mt-0.5">La fecha de recepción debe ser en el mes pactado o meses posteriores.</p>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div><label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Cantidad de Pallets</label><input type="number" id="pallets_input" min="1" value="1" class="w-full p-3 rounded-xl border-gray-200 bg-gray-50 font-bold focus:ring-[#004f89]"><p class="text-[10px] text-gray-400 mt-1 italic">Máximo 5 pallets por hora.</p></div>
                         <div><label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Fecha de Entrega</label><input type="date" id="date_input" class="w-full p-3 rounded-xl border-gray-200 bg-gray-50 focus:ring-[#004f89]"></div>
@@ -60,6 +75,7 @@
                     <div class="p-6 space-y-4">
                         <div><p class="text-[10px] text-gray-400 font-bold uppercase">Lugar de Recepción</p><p id="sum-planta" class="font-bold text-gray-800 text-xs"></p></div>
                         <div><p class="text-[10px] text-gray-400 font-bold uppercase">Material / OC</p><p id="sum-articulo" class="text-xs font-medium leading-tight text-gray-600"></p></div>
+                        <div><p class="text-[10px] text-gray-400 font-bold uppercase">Mes Pactado ERP</p><p id="sum-mes" class="font-bold text-emerald-600 text-xs uppercase"></p></div>
                         <div><p class="text-[10px] text-gray-400 font-bold uppercase">Fecha y Hora Pactada</p><p id="sum-time" class="font-black text-[#004f89] text-xl">-</p></div>
                         <button id="confirm-btn" disabled class="w-full py-4 bg-[#004f89] text-white font-black rounded-xl shadow-lg transition-all disabled:bg-gray-200 hover:bg-blue-900 border-b-4 border-blue-900 active:translate-y-1 active:border-b-0">Confirmar Turno</button>
                     </div>
@@ -74,10 +90,11 @@
     </div>
 </main>
 
+<!-- MODAL PERFIL -->
 <div id="profile-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-300">
         <div class="bg-[#004f89] p-8 text-white relative"><h3 class="text-2xl font-bold">Perfil del Proveedor</h3><p class="text-blue-100 text-xs mt-1">Verificá tus datos para avisos automáticos.</p><button id="close-profile" class="hidden absolute top-4 right-4 hover:bg-white/20 rounded-full p-2"><span class="material-symbols-outlined">close</span></button></div>
-        <div class="p-8 space-y-5"><div id="mandatory-warning" class="hidden bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-800 text-xs font-bold">Campo Obligatorio: Email y Teléfono para coordinar recepción.</div><div><label class="text-[10px] font-black text-gray-400 uppercase">Email de Contacto</label><input type="email" id="profile-email" class="w-full mt-1 p-3 bg-gray-50 border-gray-200 rounded-xl"></div><div><label class="text-[10px] font-black text-gray-400 uppercase">Teléfono de Contacto</label><input type="tel" id="profile-tel" class="w-full mt-1 p-3 bg-gray-50 border-gray-200 rounded-xl"></div><button id="save-profile" class="w-full py-4 bg-[#004f89] text-white font-black rounded-2xl shadow-xl hover:bg-blue-900 transition-all">Sincronizar Datos</button></div>
+        <div class="p-8 space-y-5"><div><label class="text-[10px] font-black text-gray-400 uppercase">Email de Contacto</label><input type="email" id="profile-email" class="w-full mt-1 p-3 bg-gray-50 border-gray-200 rounded-xl"></div><div><label class="text-[10px] font-black text-gray-400 uppercase">Teléfono de Contacto</label><input type="tel" id="profile-tel" class="w-full mt-1 p-3 bg-gray-50 border-gray-200 rounded-xl"></div><button id="save-profile" class="w-full py-4 bg-[#004f89] text-white font-black rounded-2xl shadow-xl hover:bg-blue-900 transition-all">Guardar Datos</button></div>
     </div>
 </div>
 
@@ -113,23 +130,6 @@
             document.getElementById('profile-tel').value = currentUser.telefono || '';
             document.getElementById('profile-modal').classList.remove('hidden');
             document.getElementById('close-profile').classList.toggle('hidden', !allowClose);
-            document.getElementById('mandatory-warning').classList.toggle('hidden', allowClose);
-        };
-
-        document.getElementById('close-profile').onclick = () => document.getElementById('profile-modal').classList.add('hidden');
-
-        document.getElementById('save-profile').onclick = async () => {
-            const email = document.getElementById('profile-email').value.trim();
-            const tel = document.getElementById('profile-tel').value.trim();
-            if (!email || !tel) return alert("Completá todos los campos.");
-            try {
-                const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', username: currentUser.username, email: email, telefono: tel }) });
-                if ((await res.json()).success) {
-                    currentUser.email = email; currentUser.telefono = tel;
-                    localStorage.setItem('biosintex_session', JSON.stringify(currentUser));
-                    alert("¡Perfil Guardado!"); document.getElementById('profile-modal').classList.add('hidden');
-                }
-            } catch(e) { alert("Error de servidor."); }
         };
 
         const today = new Date();
@@ -159,6 +159,7 @@
                     </div>
                     <p class="text-xs font-bold text-gray-700 leading-tight mb-2">${o.articulo}</p>
                     <p class="text-[9px] font-black text-gray-400 uppercase">📍 ${formatPlanta(o.planta)}</p>
+                    <p class="text-[9px] font-black text-blue-600 uppercase mt-1 italic">Vencimiento: ${o.fecha_planizada || 'No especificada'}</p>
                 </div>
             `).join('') || '<p class="col-span-2 text-center text-xs text-gray-400">Sin pedidos pendientes.</p>';
         }
@@ -171,6 +172,25 @@
             document.getElementById('summary-card').classList.remove('hidden');
             document.getElementById('sum-planta').innerText = formatPlanta(currentOC.planta);
             document.getElementById('sum-articulo').innerText = `${currentOC.articulo} (OC ${currentOC.oc})`;
+            
+            // Lógica de restricción de mes
+            if (currentOC.fecha_planizada) {
+                const planDate = new Date(currentOC.fecha_planizada + "T00:00:00");
+                const firstOfMonth = new Date(planDate.getFullYear(), planDate.getMonth(), 1);
+                const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                // El mínimo es mañana o el primer día del mes pactado, lo que sea posterior.
+                const realMin = firstOfMonth > tomorrow ? firstOfMonth : tomorrow;
+                dateInp.min = realMin.toISOString().split('T')[0];
+                
+                const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                document.getElementById('sum-mes').innerText = `${monthNames[planDate.getMonth()]} ${planDate.getFullYear()}`;
+                document.getElementById('month-info-text').innerHTML = `Entrega pactada para <b>${monthNames[planDate.getMonth()]}</b>. Solo se permiten turnos en este mes o posteriores.`;
+            } else {
+                document.getElementById('sum-mes').innerText = "SIN RESTRICCIÓN";
+                document.getElementById('month-info-text').innerText = "No hay una fecha pactada en el ERP. Se permiten turnos desde mañana.";
+            }
+
             resetSelection();
         };
 
@@ -185,6 +205,17 @@
             if (!dateStr) { container.innerHTML = '<p class="col-span-full text-center text-[10px] text-gray-400">Seleccioná fecha para ver horarios disponibles.</p>'; return; }
 
             const dObj = new Date(dateStr + "T00:00:00");
+            
+            // Validación de mes (por si el navegador no respeta el .min)
+            if (currentOC.fecha_planizada) {
+                const planDate = new Date(currentOC.fecha_planizada + "T00:00:00");
+                const firstOfMonth = new Date(planDate.getFullYear(), planDate.getMonth(), 1);
+                if (dObj < firstOfMonth) {
+                    container.innerHTML = '<div class="col-span-full bg-red-50 text-red-700 p-6 rounded-2xl text-center border-2 border-red-100 font-bold text-xs uppercase">No se puede elegir un mes anterior al pactado en el ERP.</div>';
+                    return;
+                }
+            }
+
             const dayNum = dObj.getDay(); 
             if (dayNum === 0 || dayNum === 6) {
                 container.innerHTML = '<div class="col-span-full bg-amber-50 text-amber-700 p-6 rounded-2xl text-center border-2 border-amber-100 font-bold text-xs uppercase">Sábados y Domingos no se reciben entregas.</div>';
@@ -247,6 +278,20 @@
                 </tr>
             `).join('') || '<tr><td colspan="6" class="p-10 text-center text-gray-400 italic font-medium">No tenés entregas próximas programadas.</td></tr>';
         }
+
+        document.getElementById('save-profile').onclick = async () => {
+            const email = document.getElementById('profile-email').value.trim();
+            const tel = document.getElementById('profile-tel').value.trim();
+            if (!email || !tel) return alert("Completá todos los campos.");
+            try {
+                const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', username: currentUser.username, email: email, telefono: tel }) });
+                if ((await res.json()).success) {
+                    currentUser.email = email; currentUser.telefono = tel;
+                    localStorage.setItem('biosintex_session', JSON.stringify(currentUser));
+                    alert("¡Perfil Guardado!"); document.getElementById('profile-modal').classList.add('hidden');
+                }
+            } catch(e) { alert("Error."); }
+        };
     });
 </script>
 </body>
