@@ -39,7 +39,7 @@
                 <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><span class="bg-[#004f89] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> Órdenes de Compra Pendientes</h2>
                     <div id="oc-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto pr-2">
-                        <p class="text-gray-500 italic py-4 text-sm font-medium">Buscando tus pedidos...</p>
+                        <p class="text-gray-500 italic py-4 text-sm font-medium text-center">Buscando tus pedidos...</p>
                     </div>
                 </div>
 
@@ -50,45 +50,34 @@
                         <div><label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Cantidad de Pallets</label><input type="number" id="pallets_input" min="1" value="1" class="w-full p-3 rounded-xl border-gray-200 bg-gray-50 font-bold focus:ring-[#004f89]"><p class="text-[10px] text-gray-400 mt-1 italic">Máximo 5 pallets por hora.</p></div>
                         <div><label class="block text-[10px] font-black text-gray-400 uppercase mb-2">Fecha de Entrega</label><input type="date" id="date_input" class="w-full p-3 rounded-xl border-gray-200 bg-gray-50 focus:ring-[#004f89]"></div>
                     </div>
-                    <div><label class="block text-[10px] font-black text-gray-400 uppercase mb-4">Turnos Disponibles</label><div id="slots-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3"></div></div>
+                    <div><label class="block text-[10px] font-black text-gray-400 uppercase mb-4">Turnos Disponibles</label><div id="slots-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div></div>
                 </div>
             </div>
 
             <div class="space-y-6">
                 <div id="summary-card" class="hidden bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden sticky top-24">
-                    <div class="bg-[#004f89] p-4 text-white font-bold flex items-center gap-2"><span class="material-symbols-outlined">assignment</span> Resumen</div>
+                    <div class="bg-[#004f89] p-4 text-white font-bold flex items-center gap-2"><span class="material-symbols-outlined">assignment</span> Resumen de Reserva</div>
                     <div class="p-6 space-y-4">
-                        <div><p class="text-[10px] text-gray-400 font-bold uppercase">Planta</p><p id="sum-planta" class="font-bold text-gray-800"></p></div>
-                        <div><p class="text-[10px] text-gray-400 font-bold uppercase">Material</p><p id="sum-articulo" class="text-xs font-medium leading-tight text-gray-600"></p></div>
-                        <div><p class="text-[10px] text-gray-400 font-bold uppercase">Fecha y Hora</p><p id="sum-time" class="font-black text-[#004f89] text-xl">-</p></div>
-                        <button id="confirm-btn" disabled class="w-full py-4 bg-[#004f89] text-white font-black rounded-xl shadow-lg transition-all disabled:bg-gray-200 hover:bg-blue-900">Confirmar Reserva</button>
+                        <div><p class="text-[10px] text-gray-400 font-bold uppercase">Lugar de Recepción</p><p id="sum-planta" class="font-bold text-gray-800 text-xs"></p></div>
+                        <div><p class="text-[10px] text-gray-400 font-bold uppercase">Material / OC</p><p id="sum-articulo" class="text-xs font-medium leading-tight text-gray-600"></p></div>
+                        <div><p class="text-[10px] text-gray-400 font-bold uppercase">Fecha y Hora Pactada</p><p id="sum-time" class="font-black text-[#004f89] text-xl">-</p></div>
+                        <button id="confirm-btn" disabled class="w-full py-4 bg-[#004f89] text-white font-black rounded-xl shadow-lg transition-all disabled:bg-gray-200 hover:bg-blue-900 border-b-4 border-blue-900 active:translate-y-1 active:border-b-0">Confirmar Turno</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- HISTORIAL -->
         <div class="mt-12 bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
-            <div class="p-6 border-b bg-gray-50"><h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Mis Próximos Turnos</h2></div>
-            <div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 text-[9px] font-black text-gray-400 uppercase tracking-tighter"><tr class="border-b"><th class="px-8 py-4">Fecha</th><th class="px-8 py-4">Hora</th><th class="px-8 py-4">Planta</th><th class="px-8 py-4">OC</th><th class="px-8 py-4 text-center">Pallets</th><th class="px-8 py-4 text-center">Estado</th></tr></thead><tbody id="history-body" class="divide-y divide-gray-100"></tbody></table></div>
+            <div class="p-6 border-b bg-gray-50"><h2 class="font-black text-gray-700 uppercase text-xs tracking-widest">Mis Entregas Programadas</h2></div>
+            <div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-gray-50 text-[9px] font-black text-gray-400 uppercase tracking-tighter"><tr class="border-b"><th class="px-8 py-4">Fecha</th><th class="px-8 py-4">Hora</th><th class="px-8 py-4">Centro Logístico / Planta</th><th class="px-8 py-4">OC</th><th class="px-8 py-4 text-center">Pallets</th><th class="px-8 py-4 text-center">Estado</th></tr></thead><tbody id="history-body" class="divide-y divide-gray-100"></tbody></table></div>
         </div>
     </div>
 </main>
 
-<!-- MODAL PERFIL -->
 <div id="profile-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-300">
-        <div class="bg-[#004f89] p-8 text-white relative">
-            <h3 class="text-2xl font-bold">Datos de Contacto</h3>
-            <p class="text-blue-100 text-xs mt-1">Obligatorio para coordinar entregas.</p>
-            <button id="close-profile" class="hidden absolute top-4 right-4 hover:bg-white/20 rounded-full p-2"><span class="material-symbols-outlined">close</span></button>
-        </div>
-        <div class="p-8 space-y-5">
-            <div id="mandatory-warning" class="hidden bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-800 text-xs font-bold leading-tight">Por favor, completá tus datos de contacto para poder operar en el sistema.</div>
-            <div><label class="text-[10px] font-black text-gray-400 uppercase">Email Corporativo</label><input type="email" id="profile-email" class="w-full mt-1 p-3 bg-gray-50 border-gray-200 rounded-xl"></div>
-            <div><label class="text-[10px] font-black text-gray-400 uppercase">WhatsApp / Teléfono</label><input type="tel" id="profile-tel" class="w-full mt-1 p-3 bg-gray-50 border-gray-200 rounded-xl"></div>
-            <button id="save-profile" class="w-full py-4 bg-[#004f89] text-white font-black rounded-2xl shadow-xl hover:bg-blue-900 transition-all">Guardar Perfil</button>
-        </div>
+        <div class="bg-[#004f89] p-8 text-white relative"><h3 class="text-2xl font-bold">Perfil del Proveedor</h3><p class="text-blue-100 text-xs mt-1">Verificá tus datos para avisos automáticos.</p><button id="close-profile" class="hidden absolute top-4 right-4 hover:bg-white/20 rounded-full p-2"><span class="material-symbols-outlined">close</span></button></div>
+        <div class="p-8 space-y-5"><div id="mandatory-warning" class="hidden bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-800 text-xs font-bold">Campo Obligatorio: Email y Teléfono para coordinar recepción.</div><div><label class="text-[10px] font-black text-gray-400 uppercase">Email de Contacto</label><input type="email" id="profile-email" class="w-full mt-1 p-3 bg-gray-50 border-gray-200 rounded-xl"></div><div><label class="text-[10px] font-black text-gray-400 uppercase">Teléfono de Contacto</label><input type="tel" id="profile-tel" class="w-full mt-1 p-3 bg-gray-50 border-gray-200 rounded-xl"></div><button id="save-profile" class="w-full py-4 bg-[#004f89] text-white font-black rounded-2xl shadow-xl hover:bg-blue-900 transition-all">Sincronizar Datos</button></div>
     </div>
 </div>
 
@@ -96,6 +85,16 @@
     const sessionStr = localStorage.getItem('biosintex_session');
     if (!sessionStr) window.location.href = 'login.html';
     const currentUser = JSON.parse(sessionStr);
+
+    const ADDR_BARRACAS = "Barracas - Salom 657";
+    const ADDR_PIBERA = "Pibera - Autovía Ruta 2 Km. 38,000 Centro Agrícola El Pato Colectora Este Km. 39,000";
+
+    function formatPlanta(name) {
+        const s = String(name).toLowerCase();
+        if (s.includes('biosintex') || s.includes('barracas')) return ADDR_BARRACAS;
+        if (s.includes('pibera') || s.includes('leloir')) return ADDR_PIBERA;
+        return name;
+    }
 
     function logout() { localStorage.removeItem('biosintex_session'); window.location.href = 'login.html'; }
 
@@ -122,20 +121,21 @@
         document.getElementById('save-profile').onclick = async () => {
             const email = document.getElementById('profile-email').value.trim();
             const tel = document.getElementById('profile-tel').value.trim();
-            if (!email || !tel) return alert("Completá ambos campos.");
+            if (!email || !tel) return alert("Completá todos los campos.");
             try {
                 const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', username: currentUser.username, email: email, telefono: tel }) });
                 if ((await res.json()).success) {
                     currentUser.email = email; currentUser.telefono = tel;
                     localStorage.setItem('biosintex_session', JSON.stringify(currentUser));
-                    alert("¡Perfil actualizado!"); document.getElementById('profile-modal').classList.add('hidden');
+                    alert("¡Perfil Guardado!"); document.getElementById('profile-modal').classList.add('hidden');
                 }
-            } catch(e) { alert("Error."); }
+            } catch(e) { alert("Error de servidor."); }
         };
 
         const today = new Date();
         const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
-        document.getElementById('date_input').min = tomorrow.toISOString().split('T')[0];
+        const dateInp = document.getElementById('date_input');
+        dateInp.min = tomorrow.toISOString().split('T')[0];
 
         async function loadData() {
             const res = await fetch(CONFIG.API_URL + "?action=get_all");
@@ -146,18 +146,19 @@
         }
 
         function renderOCs() {
-            const ocData = db.maestro_oc || [];
-            // Filtro robusto usando el campo nombre_proveedor o proveedor_id
-            const userOrders = ocData.filter(o => {
+            const userOrders = (db.maestro_oc || []).filter(o => {
                 const idProv = String(o.nombre_proveedor || o.proveedor || o.nombre_2).split('.')[0].trim();
                 return idProv === String(currentUser.proveedor_id).trim();
             });
 
             document.getElementById('oc-container').innerHTML = userOrders.map(o => `
                 <div onclick="selectOC(this, '${o.oc}')" class="oc-card p-5 border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-blue-200 transition-all group">
-                    <span class="text-[9px] font-black text-[#004f89] bg-blue-50 px-2 py-1 rounded uppercase">OC: ${o.oc}</span>
-                    <p class="text-sm font-bold text-gray-700 mt-2 leading-tight">${o.articulo}</p>
-                    <p class="text-[9px] font-black text-emerald-600 uppercase mt-2">📍 ${o.planta} | 📦 PENDIENTE: ${o.pendiente}</p>
+                    <div class="flex justify-between items-start mb-2">
+                         <span class="text-[9px] font-black text-[#004f89] bg-blue-50 px-2 py-1 rounded uppercase">OC: ${o.oc}</span>
+                         <span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase">PEN: ${o.pendiente}</span>
+                    </div>
+                    <p class="text-xs font-bold text-gray-700 leading-tight mb-2">${o.articulo}</p>
+                    <p class="text-[9px] font-black text-gray-400 uppercase">📍 ${formatPlanta(o.planta)}</p>
                 </div>
             `).join('') || '<p class="col-span-2 text-center text-xs text-gray-400">Sin pedidos pendientes.</p>';
         }
@@ -168,20 +169,27 @@
             el.classList.add('border-[#004f89]', 'bg-blue-50/50');
             document.getElementById('step-schedule').classList.remove('hidden');
             document.getElementById('summary-card').classList.remove('hidden');
-            document.getElementById('sum-planta').innerText = currentOC.planta;
-            document.getElementById('sum-articulo').innerText = currentOC.articulo;
+            document.getElementById('sum-planta').innerText = formatPlanta(currentOC.planta);
+            document.getElementById('sum-articulo').innerText = `${currentOC.articulo} (OC ${currentOC.oc})`;
             resetSelection();
         };
 
         function resetSelection() { selectedSlot = null; document.getElementById('sum-time').innerText = "-"; document.getElementById('confirm-btn').disabled = true; renderSlots(); }
-        document.getElementById('date_input').onchange = renderSlots;
+        dateInp.onchange = renderSlots;
         document.getElementById('pallets_input').oninput = renderSlots;
 
         function renderSlots() {
             const container = document.getElementById('slots-container');
-            const date = document.getElementById('date_input').value;
+            const dateStr = dateInp.value;
             const pallets = parseInt(document.getElementById('pallets_input').value) || 1;
-            if (!date) { container.innerHTML = '<p class="col-span-full text-center text-[10px] text-gray-400">Elegí fecha.</p>'; return; }
+            if (!dateStr) { container.innerHTML = '<p class="col-span-full text-center text-[10px] text-gray-400">Seleccioná fecha para ver horarios disponibles.</p>'; return; }
+
+            const dObj = new Date(dateStr + "T00:00:00");
+            const dayNum = dObj.getDay(); 
+            if (dayNum === 0 || dayNum === 6) {
+                container.innerHTML = '<div class="col-span-full bg-amber-50 text-amber-700 p-6 rounded-2xl text-center border-2 border-amber-100 font-bold text-xs uppercase">Sábados y Domingos no se reciben entregas.</div>';
+                return;
+            }
 
             const normalizeDate = (f) => {
                 if(!f) return ""; let s = String(f).split('T')[0];
@@ -189,8 +197,8 @@
                 return parts.length !== 3 ? s : (parts[0].length === 4 ? `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}` : `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`);
             };
 
-            if (blockedDates.some(b => normalizeDate(b) === date)) {
-                container.innerHTML = '<div class="col-span-full bg-red-50 text-red-700 p-6 rounded-2xl text-center border-2 border-red-100 font-bold text-xs uppercase">Día bloqueado por Biosintex.</div>'; return;
+            if (blockedDates.some(b => normalizeDate(b) === dateStr)) {
+                container.innerHTML = '<div class="col-span-full bg-red-50 text-red-700 p-6 rounded-2xl text-center border-2 border-red-100 font-bold text-xs uppercase">Día bloqueado temporalmente por Biosintex.</div>'; return;
             }
 
             const reqBlocks = Math.ceil(pallets / 5);
@@ -198,10 +206,11 @@
             const booked = new Set();
             (db.turnos || []).forEach(s => {
                 const sDate = normalizeDate(s.fecha);
-                const sPlanta = String(s.planta).toLowerCase();
-                const curPlanta = String(currentOC.planta).toLowerCase();
+                const sP = String(s.planta).toLowerCase();
+                const curP = String(currentOC.planta).toLowerCase();
+                const isMatch = sP.includes('biosintex') && curP.includes('biosintex') || sP.includes('pibera') && curP.includes('pibera') || sP.includes('leloir') && curP.includes('leloir') || sP === curP;
                 
-                if (sDate === date && sPlanta.includes(curPlanta) && String(s.estado).toLowerCase().trim() === 'confirmado') {
+                if (sDate === dateStr && isMatch && String(s.estado).toLowerCase().trim() === 'confirmado') {
                     const idx = times.indexOf(s.hora);
                     if (idx !== -1) { for(let i=0; i < Math.ceil((s.pallets||1)/5); i++) if(idx+i < times.length) booked.add(times[idx+i]); }
                 }
@@ -214,30 +223,29 @@
             }).join('');
         }
 
-        window.setSlot = (t) => { selectedSlot = t; const d = document.getElementById('date_input').value.split('-').reverse().join('/'); document.getElementById('sum-time').innerText = `${d} - ${t} hs`; document.getElementById('confirm-btn').disabled = false; renderSlots(); };
+        window.setSlot = (t) => { selectedSlot = t; const d = dateInp.value.split('-').reverse().join('/'); document.getElementById('sum-time').innerText = `${d} - ${t} hs`; document.getElementById('confirm-btn').disabled = false; renderSlots(); };
 
         document.getElementById('confirm-btn').onclick = async () => {
-            const btn = document.getElementById('confirm-btn'); btn.disabled = true; btn.innerText = "Reservando...";
-            const data = { action:'book_shift', proveedor_id:currentUser.proveedor_id, nombre_proveedor:currentUser.nombre, fecha:document.getElementById('date_input').value, hora:selectedSlot, planta:currentOC.planta, oc:currentOC.oc, articulo:currentOC.articulo, pallets:document.getElementById('pallets_input').value };
+            const btn = document.getElementById('confirm-btn'); btn.disabled = true; btn.innerText = "Sincronizando...";
+            const data = { action:'book_shift', proveedor_id:currentUser.proveedor_id, nombre_proveedor:currentUser.nombre, fecha:dateInp.value, hora:selectedSlot, planta:currentOC.planta, oc:currentOC.oc, articulo:currentOC.articulo, pallets:document.getElementById('pallets_input').value };
             try {
                 const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify(data) });
-                if ((await res.json()).success) { alert("¡Turno confirmado!"); location.reload(); }
-            } catch(e) { alert("Error."); btn.disabled = false; btn.innerText = "Confirmar Reserva"; }
+                if ((await res.json()).success) { alert("¡Turno reservado con éxito!"); location.reload(); }
+            } catch(e) { alert("Error de red."); btn.disabled = false; btn.innerText = "Confirmar Turno"; }
         };
 
         function renderHistory() {
-            const historyData = db.turnos || [];
-            const future = historyData.filter(s => String(s.proveedor_id).trim() === String(currentUser.proveedor_id).trim() && String(s.estado).toLowerCase().trim() === 'confirmado');
+            const future = (db.turnos || []).filter(s => String(s.proveedor_id).trim() === String(currentUser.proveedor_id).trim() && String(s.estado).toLowerCase().trim() === 'confirmado');
             document.getElementById('history-body').innerHTML = future.sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(s => `
                 <tr class="hover:bg-gray-50 text-[11px] font-bold text-gray-700">
                     <td class="px-8 py-4 font-black">${s.fecha.split('-').reverse().join('/')}</td>
                     <td class="px-8 py-4 text-[#004f89] font-black">${s.hora} hs</td>
-                    <td class="px-8 py-4 text-xs font-medium text-gray-400">${s.planta}</td>
+                    <td class="px-8 py-4 text-xs font-medium text-gray-400">${formatPlanta(s.planta)}</td>
                     <td class="px-8 py-4">${s.oc}</td>
                     <td class="px-8 py-4 text-center">${s.pallets || 1}</td>
                     <td class="px-8 py-4 text-center"><span class="px-3 py-1 bg-green-50 text-green-700 text-[9px] font-black rounded-lg uppercase border border-green-100">Confirmado</span></td>
                 </tr>
-            `).join('') || '<tr><td colspan="6" class="p-10 text-center text-gray-400 italic">No tenés turnos futuros.</td></tr>';
+            `).join('') || '<tr><td colspan="6" class="p-10 text-center text-gray-400 italic font-medium">No tenés entregas próximas programadas.</td></tr>';
         }
     });
 </script>
