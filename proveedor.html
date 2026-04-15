@@ -157,9 +157,10 @@
                          <span class="text-[9px] font-black text-[#004f89] bg-blue-50 px-2 py-1 rounded uppercase">OC: ${o.oc}</span>
                          <span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase">PEN: ${o.pendiente}</span>
                     </div>
-                    <p class="text-xs font-bold text-gray-700 leading-tight mb-2">${o.articulo}</p>
+                    <p class="text-sm font-bold text-gray-800 leading-tight mb-1">${o.articulo}</p>
+                    <p class="text-[9px] font-bold text-gray-400 mb-2 uppercase tracking-tighter">SKU: ${o.sku}</p>
                     <p class="text-[9px] font-black text-gray-400 uppercase">📍 ${formatPlanta(o.planta)}</p>
-                    <p class="text-[9px] font-black text-blue-600 uppercase mt-1 italic">Vencimiento: ${o.fecha_planizada || 'No especificada'}</p>
+                    <p class="text-[9px] font-black text-blue-600 uppercase mt-1 italic">Mes Pactado: ${o.fecha_planizada || 'No especificada'}</p>
                 </div>
             `).join('') || '<p class="col-span-2 text-center text-xs text-gray-400">Sin pedidos pendientes.</p>';
         }
