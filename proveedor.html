@@ -11,85 +11,114 @@
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
         body { font-family: 'Inter', sans-serif; background-color: #f8f9ff;}
-        h1, h2, h3 { font-family: 'Manrope', sans-serif; color: #004f89; }
-        .slot-btn:hover:not(:disabled) { transform: scale(1.02); }
-        .slot-btn:disabled { opacity: 0.5; background: #f3f4f6; color: #d1d5db; cursor: not-allowed; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
     </style>
 </head>
 <body class="bg-[#f8f9ff] text-[#0b1c30] antialiased">
 
-<header class="fixed top-0 w-full z-50 bg-white flex justify-between items-center px-6 h-16 shadow-sm border-b">
-    <div class="flex items-center gap-2">
-        <span class="text-[#004f89] font-extrabold text-xl tracking-tighter">Biosintex Proveedores</span>
+<!-- SECCIÓN 1: REGISTRO DE CONTACTO (Solo se ve si faltan datos) -->
+<div id="setup-view" class="hidden fixed inset-0 z-[200] bg-[#004f89] flex items-center justify-center p-4">
+    <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-500">
+        <div class="bg-gray-50 p-10 text-center border-b">
+            <div class="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-[#004f89] text-3xl">contact_mail</span>
+            </div>
+            <h2 class="text-2xl font-black text-[#004f89] mb-2">¡Bienvenido a Biosintex!</h2>
+            <p class="text-gray-500 text-sm">Para continuar, necesitamos actualizar tu información de contacto corporativo.</p>
+        </div>
+        <div class="p-10 space-y-6">
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email de la Empresa</label>
+                <input type="email" id="setup-email" placeholder="ejemplo@proveedor.com" class="w-full p-4 bg-gray-50 border-gray-100 rounded-2xl focus:ring-2 focus:ring-[#004f89] outline-none transition-all font-medium text-gray-700">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp / Teléfono</label>
+                <input type="tel" id="setup-tel" placeholder="+54 9 11 ..." class="w-full p-4 bg-gray-50 border-gray-100 rounded-2xl focus:ring-2 focus:ring-[#004f89] outline-none transition-all font-medium text-gray-700">
+            </div>
+            <div class="pt-4">
+                <button id="btn-save-setup" class="w-full py-5 bg-[#004f89] text-white font-black rounded-2xl shadow-xl hover:bg-blue-900 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                    Activar mi Cuenta <span class="material-symbols-outlined">rocket_launch</span>
+                </button>
+                <button onclick="logout()" class="w-full mt-4 text-gray-400 text-xs font-bold hover:text-gray-600 transition">Cerrar Sesión</button>
+            </div>
+        </div>
     </div>
-    <div class="flex items-center gap-4">
-        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest" id="user-display">Cargando Usuario...</span>
-        <button onclick="openProfile(true)" class="text-[#004f89] font-bold text-xs bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition shadow-sm flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm">person_edit</span> Perfil
-        </button>
-        <a href="#" onclick="logout(); return false;" class="text-red-600 font-bold hover:underline text-xs bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition">Salir</a>
-    </div>
-</header>
+</div>
 
-<main class="pt-24 pb-12 px-4 md:px-12 min-h-screen">
-    <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-6">
-                <!-- SELECCIÓN DE OC -->
-                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
-                        <span class="bg-[#004f89] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> 
-                        Órdenes de Compra Pendientes
-                    </h2>
-                    <div id="oc-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto pr-2">
-                        <!-- ESTADO INICIAL: CARGANDO -->
-                        <div id="loading-box" class="col-span-full py-12 text-center space-y-4">
-                            <div class="animate-spin inline-block w-8 h-8 border-4 border-[#004f89] border-t-transparent rounded-full"></div>
-                            <p class="text-gray-400 italic text-sm font-medium">Conectando con la base de datos de Biosintex...</p>
+<!-- SECCIÓN 2: PORTAL PRINCIPAL -->
+<div id="main-portal" class="opacity-0 transition-opacity duration-500">
+    <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md flex justify-between items-center px-6 h-16 shadow-sm border-b">
+        <div class="flex items-center gap-2">
+            <span class="text-[#004f89] font-extrabold text-xl tracking-tighter">Biosintex</span>
+            <span class="bg-blue-50 text-[#004f89] text-[9px] font-black px-2 py-0.5 rounded uppercase">Portal Proveedores</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="hidden md:block text-[11px] font-bold text-gray-400" id="user-display">MUNDO IMPRESORES</span>
+            <button onclick="document.getElementById('profile-modal').classList.remove('hidden')" class="text-[#004f89] font-bold text-xs bg-blue-50 px-4 py-2 rounded-xl hover:bg-blue-100 transition shadow-sm flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">person</span> Mi Perfil
+            </button>
+            <button onclick="logout()" class="text-red-600 font-bold hover:bg-red-50 text-xs px-4 py-2 rounded-xl transition">Salir</button>
+        </div>
+    </header>
+
+    <main class="pt-24 pb-12 px-4 md:px-12">
+        <div class="max-w-7xl mx-auto space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                        <h2 class="text-xl font-bold mb-6 flex items-center gap-3"><div class="w-2 h-8 bg-[#004f89] rounded-full"></div> Órdenes Pendientes</h2>
+                        <div id="oc-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- LOADING STATE -->
+                            <div id="loading-indicator" class="col-span-full py-20 text-center space-y-4">
+                                <div class="animate-spin inline-block w-8 h-8 border-4 border-[#004f89] border-t-transparent rounded-full"></div>
+                                <p class="text-gray-400 italic text-sm font-medium">Sincronizando con el ERP de Biosintex...</p>
+                            </div>
                         </div>
                     </div>
+
+                    <div id="step-schedule" class="hidden bg-white p-10 rounded-3xl shadow-lg border border-gray-100 animate-in slide-in-from-bottom duration-500">
+                        <h2 class="text-xl font-bold mb-8 flex items-center gap-3"><div class="w-2 h-8 bg-emerald-500 rounded-full"></div> Reservar Turno</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Cantidad de Pallets</label>
+                                <input type="number" id="pallets_input" min="1" value="1" class="w-full p-4 bg-gray-50 border-none rounded-2xl font-bold text-lg focus:ring-2 focus:ring-[#004f89]">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Fecha de Entrega</label>
+                                <input type="date" id="date_input" class="w-full p-4 bg-gray-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-[#004f89]">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3" id="slots-container"></div>
+                    </div>
                 </div>
 
-                <!-- SELECCIÓN DE TURNO -->
-                <div id="step-schedule" class="hidden bg-white p-8 rounded-2xl shadow-lg border border-gray-100 animate-in fade-in duration-300">
-                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2"><span class="bg-[#004f89] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> Selección de Fecha y Horario</h2>
-                    <div id="warning-month" class="mb-6 bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-start gap-3">
-                        <span class="material-symbols-outlined text-blue-600 font-bold">info</span>
-                        <div><p class="text-xs font-bold text-blue-900">Restricción de Entrega</p><p id="month-info-text" class="text-[11px] text-blue-700 mt-0.5">La fecha debe ser en el mes pactado o posterior.</p></div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div><label class="text-[10px] font-black text-gray-400 uppercase mb-2 block">Pallets</label><input type="number" id="pallets_input" min="1" value="1" class="w-full p-3 rounded-xl border-gray-200 bg-gray-50 font-bold"></div>
-                        <div><label class="text-[10px] font-black text-gray-400 uppercase mb-2 block">Fecha</label><input type="date" id="date_input" class="w-full p-3 rounded-xl border-gray-200 bg-gray-50 focus:ring-[#004f89]"></div>
-                    </div>
-                    <div id="slots-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3"></div>
-                </div>
-            </div>
-
-            <div class="space-y-6">
-                <!-- RESUMEN -->
-                <div id="summary-card" class="hidden bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden sticky top-24">
-                    <div class="bg-[#004f89] p-4 text-white font-bold flex items-center gap-2"><span class="material-symbols-outlined">assignment</span> Resumen de Reserva</div>
-                    <div class="p-6 space-y-4">
-                        <div><p class="text-[10px] text-gray-400 font-bold uppercase">Lugar</p><p id="sum-planta" class="font-bold text-gray-800 text-xs"></p></div>
-                        <div><p class="text-[10px] text-gray-400 font-bold uppercase">Material</p><p id="sum-articulo" class="text-xs font-medium text-gray-600"></p></div>
-                        <div><p class="text-[10px] text-gray-400 font-bold uppercase">Reserva para</p><p id="sum-time" class="font-black text-[#004f89] text-xl">-</p></div>
-                        <button id="confirm-btn" disabled class="w-full py-4 bg-[#004f89] text-white font-black rounded-xl shadow-lg disabled:bg-gray-100 transition-all">Confirmar Turno</button>
+                <div class="space-y-6">
+                    <div id="summary-card" class="hidden sticky top-24 bg-[#004f89] rounded-[2rem] p-8 text-white shadow-2xl shadow-blue-200 space-y-6 animate-in fade-in duration-500">
+                        <h3 class="text-xl font-bold flex items-center gap-2"><span class="material-symbols-outlined">verified</span> Tu Reserva</h3>
+                        <div class="space-y-4 overflow-hidden">
+                            <div><p class="text-[10px] text-blue-200 font-bold uppercase tracking-widest">Planta de Entrega</p><p id="sum-planta" class="font-bold text-xs leading-tight"></p></div>
+                            <div><p class="text-[10px] text-blue-200 font-bold uppercase tracking-widest">Material</p><p id="sum-articulo" class="text-xs font-medium"></p></div>
+                            <div class="bg-white/10 p-4 rounded-2xl"><p class="text-[10px] text-blue-200 font-bold uppercase mb-1">Horario Programado</p><p id="sum-time" class="text-2xl font-black">-</p></div>
+                        </div>
+                        <button id="confirm-btn" disabled class="w-full py-5 bg-white text-[#004f89] font-black rounded-2xl shadow-lg border-b-4 border-gray-200 transition-all disabled:opacity-50">Confirmar Reserva</button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
+    </main>
+</div>
 
-<!-- MODAL PERFIL -->
-<div id="profile-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-300">
-        <div class="bg-[#004f89] p-8 text-white relative"><h3 class="text-2xl font-bold">Datos de Contacto</h3><p class="text-blue-100 text-xs mt-1">Sincronizá tu información para operar.</p><button id="close-profile" class="hidden absolute top-4 right-4 hover:bg-white/20 rounded-full p-2"><span class="material-symbols-outlined">close</span></button></div>
-        <div class="p-8 space-y-5">
-            <div id="mandatory-warning" class="bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-800 text-[11px] font-bold flex gap-3"><span class="material-symbols-outlined text-amber-600">warning</span> Por favor, completá tu contacto corporativo para ver tus órdenes de compra.</div>
-            <div><label class="text-[10px] font-black text-gray-400 uppercase">Email</label><input type="email" id="profile-email" class="w-full mt-1 p-3 bg-gray-50 border-gray-200 rounded-xl"></div>
-            <div><label class="text-[10px] font-black text-gray-400 uppercase">WhatsApp</label><input type="tel" id="profile-tel" class="w-full mt-1 p-3 bg-gray-50 border-gray-200 rounded-xl"></div>
-            <button id="save-profile" class="w-full py-4 bg-[#004f89] text-white font-black rounded-2xl shadow-xl hover:bg-blue-900 transition-all">Guardar y Continuar</button>
+<!-- MODAL PERFIL (Para cambios posteriores) -->
+<div id="profile-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300">
+        <div class="p-8 space-y-6">
+            <h3 class="text-xl font-bold text-[#004f89]">Editar mi Perfil</h3>
+            <div><label class="text-[10px] font-black text-gray-400 uppercase">Nuevo Email</label><input type="email" id="edit-email" class="w-full mt-1 p-3 bg-gray-50 border-gray-100 rounded-xl"></div>
+            <div><label class="text-[10px] font-black text-gray-400 uppercase">Nuevo WhatsApp</label><input type="tel" id="edit-tel" class="w-full mt-1 p-3 bg-gray-50 border-gray-100 rounded-xl"></div>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('profile-modal').classList.add('hidden')" class="flex-1 py-3 text-gray-400 font-bold">Cancelar</button>
+                <button id="btn-save-edit" class="flex-1 py-3 bg-[#004f89] text-white font-black rounded-xl shadow-lg">Guardar</button>
+            </div>
         </div>
     </div>
 </div>
@@ -101,65 +130,77 @@
 
     function logout() { localStorage.removeItem('biosintex_session'); window.location.href = 'login.html'; }
 
-    var db = {}; var currentOC = null; var selectedSlot = null; var blockedDates = [];
+    var db = {}; var currentOC = null; var selectedSlot = null;
 
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('user-display').innerText = currentUser.nombre;
         
-        // REGLA 1: Si no hay contacto, mostramos el modal SIEMPRE.
+        // REGLA DE ORO: Si faltan datos, mostramos "Setup View", sino cargamos el portal normal.
         if (!currentUser.email || !currentUser.telefono || currentUser.email.trim() === "" || currentUser.telefono.trim() === "") {
-            openProfile(false);
+            document.getElementById('setup-view').classList.remove('hidden');
         } else {
-            loadData();
+            initPortal();
         }
 
-        window.openProfile = (allowClose) => {
-            document.getElementById('profile-email').value = currentUser.email || '';
-            document.getElementById('profile-tel').value = currentUser.telefono || '';
-            document.getElementById('profile-modal').classList.remove('hidden');
-            document.getElementById('close-profile').classList.toggle('hidden', !allowClose);
-        };
-
-        document.getElementById('save-profile').onclick = async () => {
-            const email = document.getElementById('profile-email').value.trim();
-            const tel = document.getElementById('profile-tel').value.trim();
-            if (!email || !tel) return alert("Completá ambos campos obligatorios.");
+        // GUARDAR SETUP INICIAL
+        document.getElementById('btn-save-setup').onclick = async () => {
+            const email = document.getElementById('setup-email').value.trim();
+            const tel = document.getElementById('setup-tel').value.trim();
+            if (!email || !tel) return alert("Por favor, completá ambos campos corporativos.");
             
-            const btn = document.getElementById('save-profile');
-            btn.disabled = true; btn.innerText = "Sincronizando...";
+            const btn = document.getElementById('btn-save-setup');
+            btn.disabled = true; btn.innerText = "Registrando...";
+            
             try {
                 const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', username: currentUser.username, email: email, telefono: tel }) });
                 const r = await res.json();
                 if (r.success) {
                     currentUser.email = email; currentUser.telefono = tel;
                     localStorage.setItem('biosintex_session', JSON.stringify(currentUser));
+                    document.getElementById('setup-view').classList.add('hidden');
+                    initPortal();
+                } else alert("Error del servidor.");
+            } catch(e) { alert("Error de conexión."); } finally { btn.disabled = false; btn.innerText = "Activar mi Cuenta"; }
+        };
+
+        // GUARDAR EDICIÓN POSTERIOR
+        document.getElementById('btn-save-edit').onclick = async () => {
+            const email = document.getElementById('edit-email').value.trim();
+            const tel = document.getElementById('edit-tel').value.trim();
+            if (!email || !tel) return alert("No podés dejar campos vacíos.");
+            try {
+                const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action: 'update_profile', username: currentUser.username, email: email, telefono: tel }) });
+                if ((await res.json()).success) {
+                    currentUser.email = email; currentUser.telefono = tel;
+                    localStorage.setItem('biosintex_session', JSON.stringify(currentUser));
                     document.getElementById('profile-modal').classList.add('hidden');
-                    loadData();
-                } else alert("Error: " + r.error);
-            } catch(e) { alert("Error de conexión."); } finally { btn.disabled = false; btn.innerText = "Guardar y Continuar"; }
+                    alert("Perfil actualizado correctamente.");
+                }
+            } catch(e) { alert("Error."); }
         };
     });
 
+    function initPortal() {
+        document.getElementById('main-portal').classList.remove('opacity-0');
+        document.getElementById('edit-email').value = currentUser.email;
+        document.getElementById('edit-tel').value = currentUser.telefono;
+        loadData();
+    }
+
     async function loadData() {
-        const container = document.getElementById('oc-container');
-        container.innerHTML = '<div class="col-span-full py-12 text-center space-y-4"><div class="animate-spin inline-block w-8 h-8 border-4 border-[#004f89] border-t-transparent rounded-full"></div><p class="text-gray-400 italic text-sm font-medium">Conectando con la base de datos de Biosintex...</p></div>';
-
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 Segundos de espera máxima
-
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
         try {
             const res = await fetch(CONFIG.API_URL + "?action=get_all", { signal: controller.signal });
             clearTimeout(timeoutId);
             const raw = await res.json();
             db = {}; Object.keys(raw).forEach(k => { db[k.trim().toLowerCase()] = raw[k]; });
             renderOCs();
-            blockedDates = (db.bloqueos || []).map(b => b.fecha);
         } catch(e) {
-            console.error("Error cargando datos:", e);
-            container.innerHTML = `
+            document.getElementById('oc-container').innerHTML = `
                 <div class="col-span-full py-10 text-center space-y-4 bg-red-50 rounded-2xl border border-red-100">
-                    <p class="text-red-700 font-bold text-sm">⚠️ El servidor de Biosintex tarda mucho en responder.</p>
-                    <button onclick="loadData()" class="px-6 py-2 bg-red-600 text-white rounded-xl font-bold text-xs uppercase shadow-lg">Reintentar Carga Ahora</button>
+                    <p class="text-red-700 font-bold text-sm">⚠️ El servidor ERP está tardando mucho.</p>
+                    <button onclick="loadData()" class="px-6 py-2 bg-red-600 text-white rounded-xl font-bold text-[10px] uppercase shadow-lg">Reintentar Ahora</button>
                 </div>`;
         }
     }
@@ -167,23 +208,33 @@
     function renderOCs() {
         const userOrders = (db.maestro_oc || []).filter(o => String(o.nombre_proveedor || o.proveedor_id).split('.')[0].trim() === String(currentUser.proveedor_id).trim());
         document.getElementById('oc-container').innerHTML = userOrders.map(o => `
-            <div onclick="selectOC(this, '${o.oc}')" class="oc-card p-5 border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-blue-200 transition-all bg-white">
-                <div class="flex justify-between items-start mb-2"><span class="text-[9px] font-black text-[#004f89] bg-blue-50 px-2 py-1 rounded uppercase">OC: ${o.oc}</span><span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase">PENDIENTE: ${o.pendiente}</span></div>
-                <p class="text-xs font-bold text-gray-800 leading-tight mb-1">${o.articulo}</p>
-                <p class="text-[9px] font-bold text-gray-400 mb-2 uppercase tracking-tighter">SKU: ${o.sku}</p>
-                <p class="text-[9px] font-black text-gray-400 uppercase">📍 ${o.planta}</p>
+            <div onclick="selectOC(this, '${o.oc}')" class="oc-card p-6 border-2 border-gray-100 rounded-[2rem] cursor-pointer hover:border-blue-400 transition-all bg-white relative overflow-hidden group">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="text-[9px] font-black text-[#004f89] bg-blue-50 px-3 py-1 rounded-full uppercase">OC: ${o.oc}</span>
+                    <span class="text-[10px] font-black text-emerald-600 uppercase">Cant: ${o.pendiente}</span>
+                </div>
+                <p class="text-sm font-bold text-gray-800 leading-tight mb-2">${o.articulo}</p>
+                <div class="flex items-center gap-2 text-[9px] font-black text-gray-400 uppercase mb-3">
+                    <span class="material-symbols-outlined text-[12px]">location_on</span> ${o.planta}
+                </div>
+                <div class="absolute bottom-0 left-0 w-full h-1 bg-gray-100 group-hover:bg-[#004f89] transition-all"></div>
             </div>
-        `).join('') || '<div class="col-span-full py-10 text-center text-gray-400 font-medium italic">No se encontraron órdenes de compra pendientes para tu ID.</div>';
+        `).join('') || '<div class="col-span-full py-20 text-center text-gray-400 font-medium italic">No tenés pedidos pendientes según el ERP.</div>';
     }
 
     window.selectOC = (el, ocNumber) => {
         currentOC = db.maestro_oc.find(o => String(o.oc) === String(ocNumber));
-        document.querySelectorAll('.oc-card').forEach(c => c.classList.remove('border-[#004f89]', 'bg-blue-50/50'));
-        el.classList.add('border-[#004f89]', 'bg-blue-50/50');
+        document.querySelectorAll('.oc-card').forEach(c => c.classList.remove('border-[#004f89]', 'shadow-2xl'));
+        el.classList.add('border-[#004f89]', 'shadow-2xl');
         document.getElementById('step-schedule').classList.remove('hidden');
         document.getElementById('summary-card').classList.remove('hidden');
         document.getElementById('sum-planta').innerText = currentOC.planta;
-        document.getElementById('sum-articulo').innerText = `${currentOC.articulo} (OC ${currentOC.oc})`;
+        document.getElementById('sum-articulo').innerText = currentOC.articulo;
+        
+        const dateInp = document.getElementById('date_input');
+        const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+        dateInp.min = tomorrow.toISOString().split('T')[0];
+        
         resetSelection();
     };
 
@@ -197,19 +248,20 @@
         const pallets = parseInt(document.getElementById('pallets_input').value) || 1;
         if (!dateStr) return;
         const dObj = new Date(dateStr + "T00:00:00");
-        if (dObj.getDay() === 0 || dObj.getDay() === 6) { container.innerHTML = '<p class="col-span-full text-center text-amber-600 font-bold text-xs uppercase p-4">Sábados y Domingos no se reciben entregas.</p>'; return; }
+        if (dObj.getDay() === 0 || dObj.getDay() === 6) { container.innerHTML = '<p class="col-span-full text-center text-amber-600 font-bold text-[10px] uppercase bg-amber-50 p-4 rounded-xl">Fines de semana cerrados.</p>'; return; }
         const times = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00"];
-        container.innerHTML = times.map(t => `<button onclick="setSlot('${t}')" class="p-3 text-xs font-black rounded-xl border-2 ${selectedSlot === t ? 'bg-[#004f89] text-white border-[#004f89]' : 'bg-white text-gray-700 border-gray-100 hover:border-[#004f89]'} transition-all">${t}</button>`).join('');
+        container.innerHTML = times.map(t => `<button onclick="setSlot('${t}')" class="p-4 text-xs font-black rounded-2xl border-2 ${selectedSlot === t ? 'bg-[#004f89] text-white border-[#004f89]' : 'bg-white text-gray-700 border-gray-100 hover:border-[#004f89] shadow-sm'} transition-all">${t}</button>`).join('');
     }
 
-    window.setSlot = (t) => { selectedSlot = t; const d = document.getElementById('date_input').value.split('-').reverse().join('/'); document.getElementById('sum-time').innerText = `${d} - ${t} hs`; document.getElementById('confirm-btn').disabled = false; renderSlots(); };
+    window.setSlot = (t) => { selectedSlot = t; const d = document.getElementById('date_input').value.split('-').reverse().join('/'); document.getElementById('sum-time').innerText = `${d} - ${t}`; document.getElementById('confirm-btn').disabled = false; renderSlots(); };
 
     document.getElementById('confirm-btn').onclick = async () => {
         const data = { action:'book_shift', proveedor_id:currentUser.proveedor_id, nombre_proveedor:currentUser.nombre, fecha:document.getElementById('date_input').value, hora:selectedSlot, planta:currentOC.planta, oc:currentOC.oc, articulo:currentOC.articulo, pallets:document.getElementById('pallets_input').value };
+        const btn = document.getElementById('confirm-btn'); btn.disabled = true; btn.innerText = "Procesando...";
         try {
             const res = await fetch(CONFIG.API_URL, { method:'POST', body:JSON.stringify(data) });
-            if ((await res.json()).success) { alert("Reserva Confirmada."); location.reload(); }
-        } catch(e) { alert("Error."); }
+            if ((await res.json()).success) { alert("¡Turno confirmado!"); location.reload(); }
+        } catch(e) { alert("Error."); btn.disabled = false; }
     };
 </script>
 </body>
