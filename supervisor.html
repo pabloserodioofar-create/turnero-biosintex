@@ -13,98 +13,91 @@
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
         body { font-family: 'Inter', sans-serif; background-color: #f8f9ff;}
         h1, h2, h3 { font-family: 'Manrope', sans-serif; }
-        .fc { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: none !important; }
+        .fc { background: white; padding: 20px; border-radius: 24px; box-shadow: 0 4px 20px -5px rgb(0 0 0 / 0.1); border: none !important; }
         .fc-header-toolbar { margin-bottom: 20px !important; }
-        .fc-button-primary { background-color: #004f89 !important; border: none !important; border-radius: 8px !important; font-weight: bold !important; text-transform: uppercase !important; font-size: 10px !important; }
-        .fc-event { border: none !important; padding: 2px 5px !important; border-radius: 4px !important; font-size: 11px !important; }
+        .fc-button-primary { background-color: #004f89 !important; border: none !important; border-radius: 12px !important; font-weight: bold !important; text-transform: uppercase !important; font-size: 10px !important; }
+        .fc-event { border: none !important; padding: 4px 8px !important; border-radius: 8px !important; font-weight: bold !important; }
         .fc-daygrid-day:hover { background-color: #f0f7ff; cursor: pointer; }
-        .fc-v-event { background-color: #004f89; border: none; }
+        .fc-timegrid-slot { height: 3em !important; }
     </style>
 </head>
 <body class="bg-[#f8f9ff] text-[#0b1c30] antialiased">
 
-<header class="fixed top-0 w-full z-50 bg-white flex justify-between items-center px-10 h-16 shadow-sm border-b">
+<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md flex justify-between items-center px-10 h-16 shadow-sm border-b">
     <div class="flex items-center gap-2"><span class="text-[#004f89] font-extrabold text-xl tracking-tighter uppercase">Biosintex Supervisor</span></div>
     <div class="flex items-center gap-6">
-        <nav class="flex gap-4 bg-gray-100 p-1 rounded-xl">
-            <button onclick="switchTab('cal')" id="tab-cal" class="px-6 py-2 rounded-lg font-black text-[10px] uppercase transition-all bg-white shadow-sm text-[#004f89]">Calendario</button>
-            <button onclick="switchTab('prov')" id="tab-prov" class="px-6 py-2 rounded-lg font-black text-[10px] uppercase transition-all text-gray-400">Proveedores</button>
+        <nav class="flex gap-2 bg-gray-100 p-1 rounded-2xl">
+            <button onclick="switchTab('cal')" id="tab-cal" class="px-6 py-2 rounded-xl font-black text-[10px] uppercase transition-all bg-white shadow-sm text-[#004f89]">Calendario</button>
+            <button onclick="switchTab('prov')" id="tab-prov" class="px-6 py-2 rounded-xl font-black text-[10px] uppercase transition-all text-gray-400">Proveedores</button>
         </nav>
-        <button onclick="location.href='login.html'" class="text-red-600 font-bold text-xs hover:underline">Salir</button>
+        <button onclick="location.href='login.html'" class="text-red-600 font-bold text-[10px] uppercase hover:underline">Salir</button>
     </div>
 </header>
 
 <main class="pt-24 pb-12 px-10">
-    <!-- VISTA CALENDARIO -->
     <div id="view-cal" class="space-y-6 animate-in fade-in duration-500">
         <div class="flex justify-between items-end">
-            <div>
-                <h1 class="text-2xl font-black text-[#004f89]">Gestión de Turnos</h1>
-                <p class="text-gray-400 font-medium text-xs">Recepción: 07:00 a 13:00 hs</p>
-            </div>
+            <div><h1 class="text-2xl font-black text-[#004f89]">Gestión de Turnos</h1><p class="text-gray-400 font-bold text-[10px] uppercase tracking-widest">Recepción: 07:00 a 13:00 hs</p></div>
             <div class="flex gap-4 items-end">
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Centro Logístico</label>
-                    <select id="planta-filter" class="block w-64 p-3 bg-white border-gray-100 rounded-xl shadow-sm font-bold text-[#004f89] focus:ring-[#004f89]">
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Filtrar Planta</label>
+                    <select id="planta-filter" class="block w-64 p-3.5 bg-white border-gray-100 rounded-2xl shadow-sm font-bold text-[#004f89] focus:ring-[#004f89]">
                         <option value="Barracas">Barracas - Salom 657</option>
                         <option value="Pibera">Pibera - Ruta 2</option>
                     </select>
                 </div>
-                <button onclick="openBlockModal()" class="h-[46px] px-6 bg-red-600 text-white font-black text-[10px] uppercase rounded-xl hover:bg-red-700 transition flex items-center gap-2 shadow-lg shadow-red-100">
-                    <span class="material-symbols-outlined text-sm">block</span> Bloquear Día
+                <button onclick="openBlockModal()" class="h-[52px] px-8 bg-red-600 text-white font-black text-[10px] uppercase rounded-2xl hover:bg-red-700 transition flex items-center gap-2 shadow-xl shadow-red-100">
+                    <span class="material-symbols-outlined text-base">block</span> Bloquear Día
                 </button>
             </div>
         </div>
         <div id="calendar"></div>
     </div>
 
-    <!-- VISTA PROVEEDORES -->
     <div id="view-prov" class="hidden space-y-6 animate-in fade-in duration-500">
-        <div class="flex justify-between items-center">
-             <h1 class="text-2xl font-black text-[#004f89]">Base de Proveedores</h1>
-        </div>
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+        <h1 class="text-2xl font-black text-[#004f89]">Control de Proveedores</h1>
+        <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-gray-100">
             <table class="w-full text-left">
-                <thead class="bg-gray-50 border-b"><tr class="text-[10px] font-black text-gray-400 uppercase tracking-widest"><th class="px-8 py-5">ID / Proveedor</th><th class="px-8 py-5">Clave de Acceso actual</th><th class="px-8 py-5 text-center">Info</th></tr></thead>
+                <thead class="bg-gray-50 border-b"><tr class="text-[9px] font-black text-gray-400 uppercase tracking-widest"><th class="px-8 py-6">ID / Proveedor</th><th class="px-8 py-6">Clave actual</th><th class="px-8 py-6 text-center">Datos contacto</th></tr></thead>
                 <tbody id="prov-list" class="divide-y divide-gray-100"></tbody>
             </table>
         </div>
     </div>
 </main>
 
-<!-- MODAL DETALLE TURNO -->
+<!-- MODAL DETALLE -->
 <div id="shift-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-300">
-        <div class="bg-[#004f89] p-8 text-white relative">
-            <h3 id="modal-title" class="text-2xl font-black">Detalle</h3>
-            <p id="modal-date" class="text-blue-100 font-bold mt-1 uppercase text-xs"></p>
-            <button onclick="closeModal('shift-modal')" class="absolute top-6 right-6 hover:bg-white/20 rounded-full p-2"><span class="material-symbols-outlined">close</span></button>
+    <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-300">
+        <div class="bg-[#004f89] p-10 text-white relative">
+            <h3 id="modal-title" class="text-2xl font-black uppercase">Turno</h3>
+            <p id="modal-date" class="text-blue-100 font-bold mt-1 uppercase text-xs tracking-widest"></p>
+            <button onclick="closeModal('shift-modal')" class="absolute top-8 right-8 hover:bg-white/20 rounded-full p-2"><span class="material-symbols-outlined">close</span></button>
         </div>
-        <div class="p-8 space-y-6">
-            <div class="grid grid-cols-2 gap-4">
-                <div><label class="text-[9px] font-black text-gray-400 uppercase">Proveedor</label><p id="det-prov" class="font-bold text-gray-700"></p></div>
-                <div><label class="text-[9px] font-black text-gray-400 uppercase">Orden Compra</label><p id="det-oc" class="font-bold text-gray-700"></p></div>
+        <div class="p-10 space-y-8">
+            <div class="grid grid-cols-2 gap-6">
+                <div><label class="text-[9px] font-black text-gray-400 uppercase">Proveedor</label><p id="det-prov" class="font-bold text-gray-800 text-sm"></p></div>
+                <div><label class="text-[9px] font-black text-gray-400 uppercase">Orden de Compra</label><p id="det-oc" class="font-bold text-gray-800 text-sm"></p></div>
             </div>
-            <div><label class="text-[9px] font-black text-gray-400 uppercase">Insumo</label><p id="det-art" class="font-bold text-gray-700 text-sm leading-tight"></p></div>
-            <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl">
-                <div><label class="text-[9px] font-black text-gray-400 uppercase block">Carga</label><p id="det-pallets" class="text-xl font-black text-[#004f89]">0 Pallets</p></div>
-                <div class="text-right"><label class="text-[9px] font-black text-gray-400 uppercase block">Hora</label><p id="det-hora" class="text-xl font-black text-[#004f89]">00:00</p></div>
+            <div><label class="text-[9px] font-black text-gray-400 uppercase">Insumo a Entregar</label><p id="det-art" class="font-bold text-gray-600 text-sm leading-tight"></p></div>
+            <div class="flex justify-between items-center bg-blue-50/50 p-6 rounded-3xl border border-blue-100">
+                <div><label class="text-[9px] font-black text-[#004f89] uppercase block mb-1">Carga (Pallets)</label><p id="det-pallets" class="text-3xl font-black text-[#004f89]">0</p></div>
+                <div class="text-right"><label class="text-[9px] font-black text-[#004f89] uppercase block mb-1">Horario Inicio</label><p id="det-hora" class="text-3xl font-black text-[#004f89]">00:00</p></div>
             </div>
-            <button id="cancel-btn" class="w-full py-4 bg-red-600 text-white font-black rounded-xl hover:bg-red-700 transition shadow-lg shadow-red-100">CANCELAR TURNO</button>
+            <button id="cancel-btn" class="w-full py-5 bg-red-600 text-white font-black rounded-2xl shadow-xl hover:bg-red-700 transition">CANCELAR ESTE TURNO</button>
         </div>
     </div>
 </div>
 
 <!-- MODAL BLOQUEO -->
 <div id="block-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden scale-in-center">
-        <div class="bg-red-600 p-8 text-white"><h3 class="text-2xl font-black italic tracking-tighter">Bloquear Día</h3><p class="text-red-100 text-[10px] font-bold uppercase tracking-widest mt-1">Suspender recepción nueva</p></div>
+    <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in duration-300">
+        <div class="bg-red-600 p-8 text-white"><h3 class="text-xl font-black uppercase tracking-tighter">Bloquear Día</h3></div>
         <div class="p-8 space-y-5">
-            <div><label class="text-[10px] font-black text-gray-400 uppercase">Fecha</label><input type="date" id="block-fecha" class="w-full mt-1 p-4 bg-gray-50 border-gray-100 rounded-2xl font-bold"></div>
-            <div><label class="text-[10px] font-black text-gray-400 uppercase">Motivo</label><input type="text" id="block-motivo" placeholder="Ej: Feriado" class="w-full mt-1 p-4 bg-gray-50 border-gray-100 rounded-2xl font-medium"></div>
-            <div class="flex gap-3 mt-4">
-                <button onclick="closeModal('block-modal')" class="flex-1 py-4 text-gray-400 font-bold">Salir</button>
-                <button id="confirm-block-btn" class="flex-2 px-8 py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl hover:bg-red-700">CONFIRMAR BLOQUEO</button>
+            <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Fecha</label><input type="date" id="block-fecha" class="w-full mt-2 p-4 bg-gray-50 border-none rounded-2xl font-bold"></div>
+            <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Motivo</label><input type="text" id="block-motivo" placeholder="Feriado / Inventario" class="w-full mt-2 p-4 bg-gray-50 border-none rounded-2xl"></div>
+            <div class="flex gap-2 mt-4">
+                <button onclick="closeModal('block-modal')" class="flex-1 py-4 text-gray-400 font-bold text-xs uppercase">Salir</button>
+                <button id="confirm-block-btn" class="flex-2 px-8 py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl">BLOQUEAR</button>
             </div>
         </div>
     </div>
@@ -117,9 +110,9 @@
         currentView = tab;
         document.getElementById('view-cal').classList.toggle('hidden', tab !== 'cal');
         document.getElementById('view-prov').classList.toggle('hidden', tab !== 'prov');
-        document.getElementById('tab-cal').className = tab === 'cal' ? 'px-6 py-2 rounded-lg font-black text-[10px] uppercase transition-all bg-white shadow-sm text-[#004f89]' : 'px-6 py-2 rounded-lg font-black text-[10px] uppercase transition-all text-gray-400';
-        document.getElementById('tab-prov').className = tab === 'prov' ? 'px-6 py-2 rounded-lg font-black text-[10px] uppercase transition-all bg-white shadow-sm text-[#004f89]' : 'px-6 py-2 rounded-lg font-black text-[10px] uppercase transition-all text-gray-400';
-        if(tab === 'cal') setTimeout(() => { if(calendar) calendar.render(); }, 100);
+        document.getElementById('tab-cal').className = tab === 'cal' ? 'px-6 py-2 rounded-xl font-black text-[10px] uppercase transition-all bg-white shadow-sm text-[#004f89]' : 'px-6 py-2 rounded-xl font-black text-[10px] uppercase transition-all text-gray-400';
+        document.getElementById('tab-prov').className = tab === 'prov' ? 'px-6 py-2 rounded-xl font-black text-[10px] uppercase transition-all bg-white shadow-sm text-[#004f89]' : 'px-6 py-2 rounded-xl font-black text-[10px] uppercase transition-all text-gray-400';
+        if(tab === 'cal' && calendar) setTimeout(() => calendar.render(), 10)
     }
 
     async function loadData() {
@@ -127,32 +120,28 @@
             const res = await fetch(CONFIG.API_URL + "?action=get_all");
             const raw = await res.json();
             db = {}; Object.keys(raw).forEach(k => { db[k.trim().toLowerCase()] = raw[k]; });
-            renderCalendar();
-            renderProviders();
-        } catch(e) { console.error("Error cargando datos:", e); }
+            renderCalendar(); renderProviders();
+        } catch(e) { console.error(e); }
     }
 
     function renderCalendar() {
         const calEl = document.getElementById('calendar');
         const filterPlanta = document.getElementById('planta-filter').value.toLowerCase();
         
-        // BLOQUEOS
-        const blockedEvents = (db.bloqueos || []).map(b => ({
+        const blocked = (db.bloqueos || []).map(b => ({
             title: 'BLOQUEADO: ' + (b.motivo || 'Cerrado'),
             start: b.fecha,
             allDay: true,
-            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-            textColor: '#b91c1c',
-            borderColor: '#ef4444',
-            display: 'background'
+            display: 'background',
+            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+            textColor: '#b91c1c'
         }));
 
-        // TURNOS CONFIRMADOS
-        const shiftEvents = (db.turnos || [])
+        const shifts = (db.turnos || [])
             .filter(s => String(s.estado).toLowerCase().trim() === 'confirmado' && String(s.planta).toLowerCase().includes(filterPlanta))
             .map(s => ({
                 id: s.id,
-                title: `${s.hora} - ${s.nombre_proveedor}`,
+                title: `${s.hora} | ${s.nombre_proveedor}`,
                 start: `${s.fecha}T${s.hora}:00`,
                 backgroundColor: '#004f89',
                 extendedProps: { ...s }
@@ -160,16 +149,13 @@
 
         if (calendar) calendar.destroy();
         calendar = new FullCalendar.Calendar(calEl, {
-            initialView: 'timeGridWeek',
+            initialView: 'dayGridMonth',
             slotMinTime: '07:00:00',
             slotMaxTime: '14:00:00',
-            allDaySlot: true,
             locale: 'es',
             headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
-            events: [...blockedEvents, ...shiftEvents],
-            eventClick: info => {
-                if (info.event.extendedProps.id) openShiftDetail(info.event.extendedProps);
-            }
+            events: [...blocked, ...shifts],
+            eventClick: info => { if (info.event.extendedProps.id) openShiftDetail(info.event.extendedProps); }
         });
         calendar.render();
     }
@@ -180,56 +166,45 @@
         document.getElementById('det-prov').innerText = s.nombre_proveedor;
         document.getElementById('det-oc').innerText = s.oc;
         document.getElementById('det-art').innerText = s.articulo;
-        document.getElementById('det-pallets').innerText = (s.pallets || 1) + " Pallets";
+        document.getElementById('det-pallets').innerText = s.pallets || 1;
         document.getElementById('det-hora').innerText = s.hora + " hs";
         
         document.getElementById('cancel-btn').onclick = async () => {
-            if(!confirm("¿Cancelar este turno?")) return;
-            const btn = document.getElementById('cancel-btn'); btn.disabled = true; btn.innerText = "PROC...")
+            if(!confirm("¿CONFIRMAR CANCELACIÓN?")) return;
+            const btn = document.getElementById('cancel-btn'); btn.disabled = true; btn.innerText = "PROCESANDO...";
             try {
                 const res = await fetch(CONFIG.API_URL, { method:'POST', body:JSON.stringify({ action:'cancel_shift', id:s.id }) });
                 if((await res.json()).success) { closeModal('shift-modal'); loadData(); }
-            } catch(e) { btn.disabled = false; btn.innerText = "CANCELAR TURNO"; }
+            } catch(e) { btn.disabled = false; btn.innerText = "CANCELAR ESTE TURNO"; }
         };
         document.getElementById('shift-modal').classList.remove('hidden');
     }
 
     function renderProviders() {
-        const body = document.getElementById('prov-list');
         const users = (db.usuarios || []).filter(u => u.rol === 'proveedor');
-        body.innerHTML = users.map(u => `
-            <tr>
-                <td class="px-8 py-5">
+        document.getElementById('prov-list').innerHTML = users.map(u => `
+            <tr class="hover:bg-gray-50">
+                <td class="px-8 py-6">
                     <p class="font-black text-gray-800 text-sm leading-none mb-1">${u.nombre || u.username}</p>
                     <p class="text-[9px] font-bold text-gray-400 uppercase">ID: ${u.proveedor_id || '---'}</p>
                 </td>
-                <td class="px-8 py-5">
-                    <p class="font-mono text-xs font-bold text-[#004f89] bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 inline-block">
-                        ${u.password}
-                    </p>
-                </td>
-                <td class="px-8 py-5 text-center">
-                    <button onclick="alert('Mail: ${u.email || "---"}\\nTel: ${u.telefono || "---"}')" class="p-2 text-gray-300 hover:text-[#004f89] transition-colors"><span class="material-symbols-outlined">contact_support</span></button>
-                </td>
+                <td class="px-8 py-6"><span class="font-mono text-xs font-bold text-[#004f89] bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100">${u.password}</span></td>
+                <td class="px-8 py-6 text-center text-[10px] font-bold text-gray-400 capitalize">${u.email || '---'}<br>${u.telefono || '---'}</td>
             </tr>
-        `).join('') || '<tr><td colspan="3" class="p-10 text-center text-gray-400">Sin proveedores.</td></tr>';
+        `).join('') || '<tr><td colspan="3" class="p-10 text-center text-gray-400">Sin datos.</td></tr>';
     }
 
     function openBlockModal() { document.getElementById('block-modal').classList.remove('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
     document.getElementById('planta-filter').onchange = renderCalendar;
     
     document.getElementById('confirm-block-btn').onclick = async () => {
-        const date = document.getElementById('block-fecha').value;
-        const note = document.getElementById('block-motivo').value || "Cerrado";
-        if(!date) return alert("Elegí fecha.");
-        const btn = document.getElementById('confirm-block-btn');
-        btn.disabled = true; btn.innerText = "BLOQUEANDO...";
+        const date = document.getElementById('block-fecha').value; if(!date) return alert("Elegí fecha.");
+        const btn = document.getElementById('confirm-block-btn'); btn.disabled = true; btn.innerText = "GUARDANDO...";
         try {
-            const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action: 'block_day', fecha: date, motivo: note }) });
+            const res = await fetch(CONFIG.API_URL, { method: 'POST', body: JSON.stringify({ action: 'block_day', fecha: date, motivo: document.getElementById('block-motivo').value || 'Cerrado' }) });
             if((await res.json()).success) { closeModal('block-modal'); loadData(); }
-        } catch(e) { alert("Error."); btn.disabled = false; btn.innerText = "CONFIRMAR BLOQUEO"; }
+        } catch(e) { alert("Error."); btn.disabled = false; btn.innerText = "BLOQUEAR"; }
     };
 
     loadData();
