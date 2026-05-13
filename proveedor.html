@@ -278,7 +278,7 @@
                 <td class="px-8 py-4 text-center font-black">${s.pallets || 1}</td>
                 <td class="px-8 py-4 text-center"><span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg text-[9px] font-black border border-emerald-100 uppercase">VIGENTE</span></td>
                 <td class="px-8 py-4 text-right">
-                    <button onclick="cancelShift(${s.id})" class="text-red-400 hover:text-red-600 font-bold uppercase text-[9px] transition-colors">Cancelar</button>
+                    <button onclick="cancelShift('${s.id}')" class="text-red-400 hover:text-red-600 font-bold uppercase text-[9px] transition-colors">Cancelar</button>
                 </td>
             </tr>
         `).join('') || '<tr><td colspan="7" class="p-10 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest italic">Aún no registras entregas.</td></tr>';
