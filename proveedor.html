@@ -169,8 +169,17 @@
         document.getElementById('sum-planta').innerText = formatPlanta(currentOC.planta);
         document.getElementById('sum-articulo').innerText = currentOC.articulo;
         
-        const minDate = new Date(); minDate.setDate(minDate.getDate() + 2); // 48hs
-        document.getElementById('date_input').min = minDate.toISOString().split('T')[0];
+        const minLead = new Date(); minLead.setDate(minLead.getDate() + 2);
+        const plannedStr = currentOC.fecha_planizada || "";
+        let finalMin = minLead;
+        
+        if (plannedStr && plannedStr.includes("-")) {
+            const plannedDate = new Date(plannedStr + "T00:00:00");
+            if (plannedDate > minLead) finalMin = plannedDate;
+        }
+
+        document.getElementById('date_input').min = finalMin.toISOString().split('T')[0];
+        document.getElementById('date_input').value = ""; // Reset para obligar a elegir
         resetSelection();
         loadPlantContact(currentOC.planta);
     };
@@ -268,7 +277,12 @@
 
     function renderHistory() {
         const uid = String(currentUser.proveedor_id).trim();
-        const shifts = (db.turnos || []).filter(s => String(s.proveedor_id).trim() === uid && String(s.estado).toLowerCase().trim() === 'confirmado');
+        const today = new Date().toISOString().split('T')[0];
+        const shifts = (db.turnos || []).filter(s => 
+            String(s.proveedor_id).trim() === uid && 
+            String(s.estado).toLowerCase().trim() === 'confirmado' &&
+            s.fecha >= today
+        );
         document.getElementById('history-body').innerHTML = shifts.sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(s => `
             <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-8 py-5 text-gray-900 font-black">${s.fecha.split('-').reverse().join('/')}</td>
@@ -281,7 +295,7 @@
                     <button onclick="cancelShift('${s.id}')" class="text-red-400 hover:text-red-600 font-bold uppercase text-[9px] transition-colors">Cancelar</button>
                 </td>
             </tr>
-        `).join('') || '<tr><td colspan="7" class="p-10 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest italic">Aún no registras entregas.</td></tr>';
+        `).join('') || '<tr><td colspan="7" class="p-10 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest italic">No hay entregas próximas programadas.</td></tr>';
     }
 
     async function cancelShift(id) {
