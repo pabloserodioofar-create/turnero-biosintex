@@ -173,18 +173,23 @@
         document.getElementById('sum-articulo').innerText = currentOC.articulo;
         
         const minLead = new Date(); minLead.setDate(minLead.getDate() + 2);
-        const plannedStr = currentOC.fecha_planificada || "";
+        let plannedStr = currentOC.fecha_planificada || "";
         let finalMin = minLead;
         
+        console.log("Validando fecha para OC:", currentOC.oc, "Fecha pactada raw:", plannedStr);
+
         if (plannedStr) {
             let pDate;
-            if (plannedStr.includes("-")) { // yyyy-mm-dd
+            if (String(plannedStr).includes("-")) { 
                 pDate = new Date(plannedStr + "T00:00:00");
-            } else if (plannedStr.includes("/")) { // dd/mm/yyyy
+            } else if (String(plannedStr).includes("/")) { 
                 const parts = plannedStr.split("/");
-                pDate = new Date(parts[2], parts[1]-1, parts[0]);
+                pDate = new Date(parts[parts.length-1], parts[1]-1, parts[0]);
             }
-            if (pDate && pDate > minLead) finalMin = pDate;
+            if (pDate && !isNaN(pDate.getTime())) {
+                console.log("Fecha pactada procesada:", pDate.toISOString());
+                if (pDate > minLead) finalMin = pDate;
+            }
         }
 
         document.getElementById('date_input').min = finalMin.toISOString().split('T')[0];
