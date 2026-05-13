@@ -154,7 +154,10 @@
             <div onclick="selectOC(this, '${o.oc}')" class="oc-card p-6 border-2 border-gray-100 rounded-[2.5rem] cursor-pointer hover:border-[#004f89] transition-all bg-white relative group shadow-sm">
                 <div class="flex justify-between items-start mb-4"><span class="text-[9px] font-black text-[#004f89] bg-blue-50 px-3 py-1 rounded-full uppercase">OC: ${o.oc}</span><span class="text-[9px] font-black text-emerald-600 uppercase">PEND: ${o.pendiente}</span></div>
                 <p class="text-xs font-black text-gray-800 leading-tight mb-2">${o.articulo}</p>
-                <p class="text-[9px] font-black text-gray-400 uppercase">📍 ${formatPlanta(o.planta)}</p>
+                <div class="flex justify-between items-center">
+                    <p class="text-[9px] font-black text-gray-400 uppercase">📍 ${formatPlanta(o.planta)}</p>
+                    <p class="text-[9px] font-black text-[#004f89] uppercase italic">${o.fecha_planificada ? '📅 Pactada: '+o.fecha_planificada : ''}</p>
+                </div>
                 <div class="absolute bottom-0 left-10 right-10 h-1 bg-gray-100 group-hover:bg-[#004f89] transition-all"></div>
             </div>
         `).join('') || '<div class="col-span-full py-10 text-center text-gray-400 font-bold uppercase text-[10px]">Sin pedidos pendientes vinculados.</div>';
@@ -170,12 +173,18 @@
         document.getElementById('sum-articulo').innerText = currentOC.articulo;
         
         const minLead = new Date(); minLead.setDate(minLead.getDate() + 2);
-        const plannedStr = currentOC.fecha_planizada || "";
+        const plannedStr = currentOC.fecha_planificada || "";
         let finalMin = minLead;
         
-        if (plannedStr && plannedStr.includes("-")) {
-            const plannedDate = new Date(plannedStr + "T00:00:00");
-            if (plannedDate > minLead) finalMin = plannedDate;
+        if (plannedStr) {
+            let pDate;
+            if (plannedStr.includes("-")) { // yyyy-mm-dd
+                pDate = new Date(plannedStr + "T00:00:00");
+            } else if (plannedStr.includes("/")) { // dd/mm/yyyy
+                const parts = plannedStr.split("/");
+                pDate = new Date(parts[2], parts[1]-1, parts[0]);
+            }
+            if (pDate && pDate > minLead) finalMin = pDate;
         }
 
         document.getElementById('date_input').min = finalMin.toISOString().split('T')[0];
