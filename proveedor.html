@@ -69,7 +69,15 @@
                             <div><p class="text-[9px] text-blue-200 font-black uppercase tracking-widest">Material</p><p id="sum-articulo" class="text-[10px] font-medium leading-tight"></p></div>
                             <div class="bg-white/10 p-5 rounded-3xl border border-white/5"><p class="text-[9px] text-blue-200 font-black uppercase mb-1">Día y Hora</p><p id="sum-time" class="text-3xl font-black">-</p></div>
                         </div>
-                        <button id="confirm-btn" disabled class="w-full py-5 bg-white text-[#004f89] font-black rounded-2xl shadow-lg disabled:opacity-30 uppercase text-xs tracking-widest active:scale-95 transition-all">RESERVAR TRUNO</button>
+                        
+                        <!-- Contacto de Planta -->
+                        <div id="plant-contact-box" class="hidden bg-white/10 p-5 rounded-3xl border border-dashed border-white/20 mt-4 animate-in fade-in zoom-in">
+                            <p class="text-[9px] text-blue-200 font-black uppercase mb-2">📞 Contacto Urgente Planta</p>
+                            <p id="plant-phone" class="text-xs font-bold mb-1"></p>
+                            <p id="plant-email" class="text-[10px] text-blue-100"></p>
+                        </div>
+
+                        <button id="confirm-btn" disabled class="w-full py-5 bg-white text-[#004f89] font-black rounded-2xl shadow-lg disabled:opacity-30 uppercase text-xs tracking-widest active:scale-95 transition-all mt-6">RESERVAR TURNO</button>
                     </div>
                 </div>
             </div>
@@ -78,7 +86,7 @@
                 <div class="p-6 border-b bg-gray-50"><h2 class="font-black text-gray-400 uppercase text-[10px] tracking-widest">Próximas Entregas de Mi Cuenta</h2></div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left font-bold text-[11px]">
-                        <thead class="bg-gray-50 text-[9px] font-black text-gray-300 uppercase border-b"><tr><th class="px-8 py-5">Fecha</th><th class="px-8 py-5">Hora</th><th class="px-8 py-5">Planta</th><th class="px-8 py-5">OC</th><th class="px-8 py-5 text-center">Pallets</th><th class="px-8 py-4 text-center">Estado</th></tr></thead>
+                        <thead class="bg-gray-50 text-[9px] font-black text-gray-300 uppercase border-b"><tr><th class="px-8 py-5">Fecha</th><th class="px-8 py-5">Hora</th><th class="px-8 py-5">Planta</th><th class="px-8 py-5">OC</th><th class="px-8 py-5 text-center">Pallets</th><th class="px-8 py-4 text-center">Estado</th><th class="px-8 py-4 text-right">Acción</th></tr></thead>
                         <tbody id="history-body" class="divide-y divide-gray-100 text-gray-600"></tbody>
                     </table>
                 </div>
@@ -164,7 +172,26 @@
         const minDate = new Date(); minDate.setDate(minDate.getDate() + 2); // 48hs
         document.getElementById('date_input').min = minDate.toISOString().split('T')[0];
         resetSelection();
+        loadPlantContact(currentOC.planta);
     };
+
+    async function loadPlantContact(plantaName) {
+        const p = plantaName.toLowerCase();
+        const plantaKey = (p.includes('barracas') || p.includes('salom') || p.includes('biosintex')) ? 'Barracas' : 'Pibera';
+        
+        try {
+            const res = await fetch(CONFIG.API_URL + "?action=get_plant_contacts");
+            const data = await res.json();
+            const contact = data.find(c => c.planta === plantaKey);
+            if (contact && (contact.phone || contact.email)) {
+                document.getElementById('plant-phone').innerText = contact.phone || 'No disponible';
+                document.getElementById('plant-email').innerText = contact.email || '';
+                document.getElementById('plant-contact-box').classList.remove('hidden');
+            } else {
+                document.getElementById('plant-contact-box').classList.add('hidden');
+            }
+        } catch(e) { console.error("Error loading plant contact", e); }
+    }
 
     function resetSelection() { selectedSlot = null; document.getElementById('sum-time').innerText = "-"; document.getElementById('confirm-btn').disabled = true; renderSlots(); }
     document.getElementById('date_input').onchange = renderSlots;
@@ -250,8 +277,28 @@
                 <td class="px-8 py-4 uppercase">${s.oc}</td>
                 <td class="px-8 py-4 text-center font-black">${s.pallets || 1}</td>
                 <td class="px-8 py-4 text-center"><span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg text-[9px] font-black border border-emerald-100 uppercase">VIGENTE</span></td>
+                <td class="px-8 py-4 text-right">
+                    <button onclick="cancelShift(${s.id})" class="text-red-400 hover:text-red-600 font-bold uppercase text-[9px] transition-colors">Cancelar</button>
+                </td>
             </tr>
-        `).join('') || '<tr><td colspan="6" class="p-10 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest italic">Aún no registras entregas.</td></tr>';
+        `).join('') || '<tr><td colspan="7" class="p-10 text-center text-gray-400 font-black uppercase text-[10px] tracking-widest italic">Aún no registras entregas.</td></tr>';
+    }
+
+    async function cancelShift(id) {
+        if (!confirm("¿Seguro que desea cancelar este turno?")) return;
+        try {
+            const res = await fetch(CONFIG.API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'cancel_shift', id: id })
+            });
+            const result = await res.json();
+            if (result.success) {
+                alert("Turno cancelado correctamente.");
+                loadData();
+            } else {
+                alert("Error: " + (result.error || "No se pudo cancelar"));
+            }
+        } catch(e) { alert("Error de conexión"); }
     }
 </script>
 </body>
