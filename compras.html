@@ -137,10 +137,15 @@
         if(data.length === 0) return alert("Archivo vacío.");
         const rawHeaders = Object.keys(data[0]);
         const foundHeaders = rawHeaders.map(normalize);
-        const required = ["Orden de Compra", "Descripción del Artículo", "Lugar Recepción", "Cantidad Pendientede Entrega"];
-        const missing = required.filter(h => !foundHeaders.includes(normalize(h)));
+        const required = ["Orden de Compra", "Nombre_1", "Lugar Recepción", "Cantidad Pendiente de Entrega"];
+        
+        // Función de normalización extra para comparación (quita espacios y acentos)
+        const ultraNormalize = (s) => normalize(s).replace(/\s+/g, '');
+        const foundUltra = foundHeaders.map(h => h.replace(/\s+/g, ''));
+        
+        const missing = required.filter(h => !foundUltra.includes(ultraNormalize(h)));
 
-        if(missing.length > 0) return alert("Faltan columnas críticas: " + missing.join(", "));
+        if(missing.length > 0) return alert("Faltan columnas críticas en el archivo: " + missing.join(", ") + "\n\nPor favor, verificá los nombres de las columnas.");
 
         document.getElementById('loading').classList.remove('hidden');
         try {
